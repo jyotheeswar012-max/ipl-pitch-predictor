@@ -1,11 +1,11 @@
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.preprocessing import LabelEncoder
 
 
 def train_model(df: pd.DataFrame):
-    """Train RandomForest regressor on suitability_score."""
+    """Train DecisionTree regressor on suitability_score."""
     le_pitch = LabelEncoder()
     le_venue = LabelEncoder()
     le_toss  = LabelEncoder()
@@ -25,8 +25,8 @@ def train_model(df: pd.DataFrame):
     X = df[feature_cols]
     y = df['suitability_score']
 
-    model = RandomForestRegressor(
-        n_estimators=200, max_depth=12, random_state=42, n_jobs=-1
+    model = DecisionTreeRegressor(
+        max_depth=12, random_state=42
     )
     model.fit(X, y)
 
