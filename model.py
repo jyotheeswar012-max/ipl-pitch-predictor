@@ -39,6 +39,14 @@ def train_model(df: pd.DataFrame):
     return model, label_encoders, feature_cols
 
 
+# FIX 3: Toss modifier — Bat First favours bowlers early,
+# Chase favours batters/WKs (settled pitch + dew effect)
+TOSS_ROLE_MODIFIER = {
+    "Bat First": {"Batsman": 2, "Wicketkeeper-Batter": 1, "All-Rounder": 1, "Bowler": 3},
+    "Chase":     {"Batsman": 3, "Wicketkeeper-Batter": 3, "All-Rounder": 2, "Bowler": 0},
+}
+
+
 def predict_best_players(
     df: pd.DataFrame,
     model,
@@ -50,9 +58,11 @@ def predict_best_players(
     top_n: int = 10,
     role_filter: list = None,
 ):
-    from data_generator import PLAYER_MODIFIERS, _reason, REAL_PLAYER_STATS, VENUE_PITCH_MODIFIERS
+    from data_generator import _reason, REAL_PLAYER_STATS, VENUE_PITCH_MODIFIERS
 
-    agg = df.groupby(['player_name', 'role', 'team'], as_index=False).agg(
+    # FIX 2: filter by selected pitch_type so stats are pitch-relevant
+    pitch_df = df[df['pitch_type'] == pitch_type]
+    agg = pitch_df.groupby(['player_name', 'role', 'team'], as_index=False).agg(
         batting_avg=('batting_avg', 'mean'),
         strike_rate=('strike_rate', 'mean'),
         economy=('economy', 'mean'),
@@ -101,9 +111,11 @@ def predict_best_players(
 
         pred_score = float(model.predict(features)[0])
 
-        player_mod  = PLAYER_MODIFIERS.get(row['player_name'], {}).get(pitch_type, 0.0)
-        venue_mod   = VENUE_PITCH_MODIFIERS.get(venue, {}).get(pitch_type, {}).get(row['role'], 0)
-        final_score = round(float(np.clip(pred_score + player_mod * 100 + venue_mod, 0, 100)), 2)
+        # FIX 1: player_mod already learned by model during training — do NOT add again
+        # FIX 3: apply toss modifier so Bat First / Chase actually changes scores
+        venue_mod = VENUE_PITCH_MODIFIERS.get(venue, {}).get(pitch_type, {}).get(row['role'], 0)
+        toss_mod  = TOSS_ROLE_MODIFIER.get(toss, {}).get(row['role'], 0)
+        final_score = round(float(np.clip(pred_score + venue_mod + toss_mod, 0, 100)), 2)
 
         reason = _reason(
             row['player_name'], row['role'], pitch_type,
