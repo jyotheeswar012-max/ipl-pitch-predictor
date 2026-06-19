@@ -50,26 +50,19 @@ def predict_best_players(
     top_n: int = 10,
     role_filter: list = None,
 ):
-    """Predict suitability score for every player under the given conditions."""
-    from data_generator import PLAYER_MODIFIERS, _reason, REAL_PLAYER_STATS
+    from data_generator import PLAYER_MODIFIERS, _reason, REAL_PLAYER_STATS, VENUE_PITCH_MODIFIERS
 
-    # Aggregate per player (mean stats across all records)
-    agg_dict = {
-        'batting_avg':       ('batting_avg',       'mean'),
-        'strike_rate':       ('strike_rate',        'mean'),
-        'economy':           ('economy',            'mean'),
-        'wickets_per_match': ('wickets_per_match',  'mean'),
-    }
-    # Include data_source if present
-    group_cols = ['player_name', 'role', 'team']
-    agg = df.groupby(group_cols).agg(**agg_dict).reset_index()
+    agg = df.groupby(['player_name', 'role', 'team'], as_index=False).agg(
+        batting_avg=('batting_avg', 'mean'),
+        strike_rate=('strike_rate', 'mean'),
+        economy=('economy', 'mean'),
+        wickets_per_match=('wickets_per_match', 'mean'),
+    )
 
-    # Attach data_source from master dict (safe fallback to 'real_ipl')
     agg['data_source'] = agg['player_name'].apply(
         lambda n: REAL_PLAYER_STATS.get(n, {}).get('data_source', 'real_ipl')
     )
 
-    # Apply role filter
     if role_filter:
         agg = agg[agg['role'].isin(role_filter)]
 
@@ -108,8 +101,9 @@ def predict_best_players(
 
         pred_score = float(model.predict(features)[0])
 
-        player_mod = PLAYER_MODIFIERS.get(row['player_name'], {}).get(pitch_type, 0.0)
-        final_score = round(float(np.clip(pred_score + player_mod * 100, 0, 100)), 2)
+        player_mod  = PLAYER_MODIFIERS.get(row['player_name'], {}).get(pitch_type, 0.0)
+        venue_mod   = VENUE_PITCH_MODIFIERS.get(venue, {}).get(pitch_type, {}).get(row['role'], 0)
+        final_score = round(float(np.clip(pred_score + player_mod * 100 + venue_mod, 0, 100)), 2)
 
         reason = _reason(
             row['player_name'], row['role'], pitch_type,

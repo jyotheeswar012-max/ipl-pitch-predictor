@@ -2,14 +2,6 @@ import pandas as pd
 import numpy as np
 
 # ─────────────────────────────────────────────────────────────────────────────
-# COMPLETE IPL 2026 SQUAD DATA — ALL 10 TEAMS (duplicate-free)
-# Sources: NDTV Sports, Cricbuzz, ESPN Cricinfo, Olympics.com
-# data_source:
-#   "real_ipl"            -> verified IPL 2025/2026 stats
-#   "estimated_domestic"  -> domestic T20 / Ranji estimate
-#   "role_based_fallback" -> new/uncapped, role-average profile
-# NOTE: Each player appears exactly once (team = IPL 2026 squad team)
-# ─────────────────────────────────────────────────────────────────────────────
 REAL_PLAYER_STATS = {
 
     # ══ CHENNAI SUPER KINGS (CSK) ═══════════════════════════════════════════
@@ -230,6 +222,76 @@ VENUES = [
 ]
 TOSS = ["Bat First", "Chase"]
 
+# ── Venue + Pitch combo score modifiers (added to final suitability score) ────────────
+# Positive = pitch suits batters/bowlers more at this venue
+# Based on real IPL venue characteristics
+VENUE_PITCH_MODIFIERS = {
+    # Wankhede: high-scoring flat track, dew factor at night, pace-friendly
+    "Wankhede Stadium, Mumbai": {
+        "Flat/Batting":     {"Batsman": 8,  "Wicketkeeper-Batter": 7,  "All-Rounder": 4,  "Bowler": -4},
+        "Hard/True Bounce": {"Batsman": 5,  "Wicketkeeper-Batter": 4,  "All-Rounder": 5,  "Bowler":  6},
+        "Green/Grassy":     {"Batsman": -3, "Wicketkeeper-Batter": -2, "All-Rounder": 3,  "Bowler":  9},
+        "Slow/Dry Spin":    {"Batsman": 2,  "Wicketkeeper-Batter": 2,  "All-Rounder": 4,  "Bowler":  3},
+        "Wet/Dew Heavy":    {"Batsman": 9,  "Wicketkeeper-Batter": 8,  "All-Rounder": 5,  "Bowler": -5},
+    },
+    # Chinnaswamy: high-altitude flat track, big hits, batters paradise
+    "M Chinnaswamy Stadium, Bengaluru": {
+        "Flat/Batting":     {"Batsman": 10, "Wicketkeeper-Batter": 9,  "All-Rounder": 5,  "Bowler": -6},
+        "Hard/True Bounce": {"Batsman": 6,  "Wicketkeeper-Batter": 5,  "All-Rounder": 4,  "Bowler":  3},
+        "Green/Grassy":     {"Batsman": -2, "Wicketkeeper-Batter": -1, "All-Rounder": 2,  "Bowler":  7},
+        "Slow/Dry Spin":    {"Batsman": 3,  "Wicketkeeper-Batter": 3,  "All-Rounder": 5,  "Bowler":  4},
+        "Wet/Dew Heavy":    {"Batsman": 8,  "Wicketkeeper-Batter": 7,  "All-Rounder": 4,  "Bowler": -4},
+    },
+    # Eden Gardens: swing-friendly morning, spin later, crowd factor
+    "Eden Gardens, Kolkata": {
+        "Flat/Batting":     {"Batsman": 5,  "Wicketkeeper-Batter": 5,  "All-Rounder": 4,  "Bowler": -2},
+        "Hard/True Bounce": {"Batsman": 3,  "Wicketkeeper-Batter": 3,  "All-Rounder": 5,  "Bowler":  7},
+        "Green/Grassy":     {"Batsman": -4, "Wicketkeeper-Batter": -3, "All-Rounder": 3,  "Bowler": 11},
+        "Slow/Dry Spin":    {"Batsman": 4,  "Wicketkeeper-Batter": 3,  "All-Rounder": 7,  "Bowler":  8},
+        "Wet/Dew Heavy":    {"Batsman": 6,  "Wicketkeeper-Batter": 6,  "All-Rounder": 4,  "Bowler": -3},
+    },
+    # Narendra Modi (Ahmedabad): large ground, spin-friendly, slow outfield
+    "Narendra Modi Stadium, Ahmedabad": {
+        "Flat/Batting":     {"Batsman": 4,  "Wicketkeeper-Batter": 4,  "All-Rounder": 3,  "Bowler": -1},
+        "Hard/True Bounce": {"Batsman": 3,  "Wicketkeeper-Batter": 3,  "All-Rounder": 4,  "Bowler":  5},
+        "Green/Grassy":     {"Batsman": -2, "Wicketkeeper-Batter": -1, "All-Rounder": 2,  "Bowler":  6},
+        "Slow/Dry Spin":    {"Batsman": 5,  "Wicketkeeper-Batter": 4,  "All-Rounder": 8,  "Bowler": 10},
+        "Wet/Dew Heavy":    {"Batsman": 5,  "Wicketkeeper-Batter": 5,  "All-Rounder": 3,  "Bowler": -2},
+    },
+    # Arun Jaitley (Delhi): pace & bounce, helpful for seamers early
+    "Arun Jaitley Stadium, Delhi": {
+        "Flat/Batting":     {"Batsman": 5,  "Wicketkeeper-Batter": 5,  "All-Rounder": 4,  "Bowler": -3},
+        "Hard/True Bounce": {"Batsman": 7,  "Wicketkeeper-Batter": 6,  "All-Rounder": 6,  "Bowler":  8},
+        "Green/Grassy":     {"Batsman": -3, "Wicketkeeper-Batter": -2, "All-Rounder": 3,  "Bowler": 10},
+        "Slow/Dry Spin":    {"Batsman": 3,  "Wicketkeeper-Batter": 2,  "All-Rounder": 5,  "Bowler":  6},
+        "Wet/Dew Heavy":    {"Batsman": 6,  "Wicketkeeper-Batter": 6,  "All-Rounder": 4,  "Bowler": -2},
+    },
+    # Chepauk (Chennai): slow & low, spin paradise, tough batting second innings
+    "MA Chidambaram Stadium, Chennai": {
+        "Flat/Batting":     {"Batsman": 3,  "Wicketkeeper-Batter": 3,  "All-Rounder": 4,  "Bowler":  0},
+        "Hard/True Bounce": {"Batsman": 1,  "Wicketkeeper-Batter": 1,  "All-Rounder": 3,  "Bowler":  4},
+        "Green/Grassy":     {"Batsman": -2, "Wicketkeeper-Batter": -1, "All-Rounder": 2,  "Bowler":  7},
+        "Slow/Dry Spin":    {"Batsman": 6,  "Wicketkeeper-Batter": 5,  "All-Rounder": 9,  "Bowler": 13},
+        "Wet/Dew Heavy":    {"Batsman": 4,  "Wicketkeeper-Batter": 4,  "All-Rounder": 3,  "Bowler":  1},
+    },
+    # Rajiv Gandhi (Hyderabad): flat, high-scoring, good for batting
+    "Rajiv Gandhi Stadium, Hyderabad": {
+        "Flat/Batting":     {"Batsman": 7,  "Wicketkeeper-Batter": 7,  "All-Rounder": 5,  "Bowler": -4},
+        "Hard/True Bounce": {"Batsman": 4,  "Wicketkeeper-Batter": 4,  "All-Rounder": 4,  "Bowler":  5},
+        "Green/Grassy":     {"Batsman": -2, "Wicketkeeper-Batter": -1, "All-Rounder": 2,  "Bowler":  8},
+        "Slow/Dry Spin":    {"Batsman": 4,  "Wicketkeeper-Batter": 4,  "All-Rounder": 6,  "Bowler":  7},
+        "Wet/Dew Heavy":    {"Batsman": 7,  "Wicketkeeper-Batter": 7,  "All-Rounder": 4,  "Bowler": -3},
+    },
+    # Sawai Mansingh (Jaipur): spin-friendly, slow pitch, unpredictable bounce
+    "Sawai Mansingh Stadium, Jaipur": {
+        "Flat/Batting":     {"Batsman": 4,  "Wicketkeeper-Batter": 4,  "All-Rounder": 3,  "Bowler": -2},
+        "Hard/True Bounce": {"Batsman": 3,  "Wicketkeeper-Batter": 3,  "All-Rounder": 4,  "Bowler":  5},
+        "Green/Grassy":     {"Batsman": -3, "Wicketkeeper-Batter": -2, "All-Rounder": 3,  "Bowler":  8},
+        "Slow/Dry Spin":    {"Batsman": 5,  "Wicketkeeper-Batter": 5,  "All-Rounder": 7,  "Bowler": 11},
+        "Wet/Dew Heavy":    {"Batsman": 5,  "Wicketkeeper-Batter": 5,  "All-Rounder": 3,  "Bowler": -1},
+    },
+}
+
 PITCH_ROLE_WEIGHTS = {
     "Flat/Batting":     {"Batsman": 0.95, "Wicketkeeper-Batter": 0.90, "All-Rounder": 0.80, "Bowler": 0.45},
     "Hard/True Bounce": {"Batsman": 0.85, "Wicketkeeper-Batter": 0.80, "All-Rounder": 0.78, "Bowler": 0.82},
@@ -321,9 +383,10 @@ def _get_real_stats(player_name, pitch_type, rng):
     return round(avg, 2), round(sr, 2), round(econ, 2), round(wpm, 2)
 
 
-def _compute_suitability(player_name, role, pitch_type, batting_avg, strike_rate, economy, wickets_per_match, rng):
-    base_weight = PITCH_ROLE_WEIGHTS[pitch_type][role]
-    player_mod  = PLAYER_MODIFIERS.get(player_name, {}).get(pitch_type, 0.0)
+def _compute_suitability(player_name, role, pitch_type, venue, batting_avg, strike_rate, economy, wickets_per_match, rng):
+    base_weight  = PITCH_ROLE_WEIGHTS[pitch_type][role]
+    player_mod   = PLAYER_MODIFIERS.get(player_name, {}).get(pitch_type, 0.0)
+    venue_mod    = VENUE_PITCH_MODIFIERS.get(venue, {}).get(pitch_type, {}).get(role, 0)
     norm_avg  = min(batting_avg  / 70,  1.0)
     norm_sr   = min(strike_rate  / 220, 1.0)
     norm_econ = max(0.0, 1.0 - (economy - 5.0) / 7.0)
@@ -336,7 +399,7 @@ def _compute_suitability(player_name, role, pitch_type, batting_avg, strike_rate
         raw = 0.30 * norm_avg + 0.25 * norm_sr + 0.25 * norm_econ + 0.20 * norm_wpm
     else:  # Wicketkeeper-Batter
         raw = 0.40 * norm_avg + 0.45 * norm_sr + 0.10 * norm_econ + 0.05 * norm_wpm
-    score = (raw * base_weight + player_mod) * 100
+    score = (raw * base_weight + player_mod) * 100 + venue_mod
     score += rng.normal(0, 2)
     return round(float(np.clip(score, 0, 100)), 2)
 
@@ -359,7 +422,7 @@ def _reason(player_name, role, pitch_type, suitability_score, batting_avg, strik
         },
         "Green/Grassy": {
             "Batsman":             f"Solid technique holds up — avg {batting_avg:.0f}{tag} on a seaming surface.",
-            "Bowler":              f"Seam & swing support; economy {economy:.2f}{tag} + wickets per match impressive.",
+            "Bowler":              f"Seam & swing support; economy {economy:.2f}{tag} + wickets impressive on green top.",
             "All-Rounder":         f"Seam bowling + batting avg {batting_avg:.0f}{tag} = dual impact on green top.",
             "Wicketkeeper-Batter": f"Patient batter exploits loose deliveries after top-order falls.",
         },
@@ -390,7 +453,7 @@ def generate_ipl_dataset(n_records_per_combo: int = 4, seed: int = 42):
                 for toss in TOSS:
                     for _ in range(n_records_per_combo):
                         avg, sr, econ, wpm = _get_real_stats(name, pitch, rng)
-                        suit = _compute_suitability(name, role, pitch, avg, sr, econ, wpm, rng)
+                        suit = _compute_suitability(name, role, pitch, venue, avg, sr, econ, wpm, rng)
                         rows.append({
                             "player_name":       name,
                             "role":              role,
