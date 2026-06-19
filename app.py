@@ -4,7 +4,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from model import train_model, predict_best_players
-from data_generator import generate_ipl_dataset
+from data_generator import generate_ipl_dataset, REAL_PLAYER_STATS
 
 st.set_page_config(
     page_title="IPL Pitch Predictor",
@@ -42,6 +42,40 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# ── Known Indian domestic players (not overseas) ──────────────────────
+INDIAN_PLAYERS = {
+    "Ruturaj Gaikwad", "Ayush Mhatre", "MS Dhoni", "Shivam Dube", "Sanju Samson",
+    "Khaleel Ahmed", "Anshul Kamboj", "Shreyas Gopal", "Mukesh Choudhary", "Kartik Sharma",
+    "Rahul Chahar", "Gurjapneet Singh", "Ramakrishna Ghosh", "Akeal Hosein",
+    "Rohit Sharma", "Suryakumar Yadav", "Tilak Varma", "Hardik Pandya", "Jasprit Bumrah",
+    "Deepak Chahar", "Naman Dhir", "Shardul Thakur", "Robin Minz", "Raj Angad Bawa",
+    "Raghu Sharma", "Ashwani Kumar",
+    "Rinku Singh", "Angkrish Raghuvanshi", "Varun Chakravarthy", "Harshit Rana",
+    "Vaibhav Arora", "Ajinkya Rahane", "Ramandeep Singh", "Umran Malik",
+    "Ankul Roy", "Rahul Tripathi", "Akashdeep",
+    "Rajat Patidar", "Virat Kohli", "Devdutt Padikkal", "Jitesh Sharma",
+    "Krunal Pandya", "Bhuvneshwar Kumar", "Yash Dayal", "Venkatesh Iyer",
+    "Swapnil Singh", "Rasikh Salam", "Suyash Sharma", "Nuwan Thushara",
+    "Shreyas Iyer", "Prabhsimran Singh", "Priyansh Arya", "Shashank Singh",
+    "Yuzvendra Chahal", "Arshdeep Singh", "Nehal Wadhera", "Harpreet Brar",
+    "Azmatullah Omarzai", "Musheer Khan", "Vyshak Vijaykumar", "Vishnu Vinod",
+    "Shubman Gill", "Washington Sundar", "Mohammed Siraj", "Prasidh Krishna",
+    "Sai Kishore", "Shahrukh Khan", "Rahul Tewatia", "Nishant Sindhu",
+    "Ishant Sharma", "Gurnoor Singh Brar", "Manav Suthar", "Jayant Yadav",
+    "Kumar Kushagra", "Anuj Rawat",
+    "Vaibhav Sooryavanshi", "Yashasvi Jaiswal", "Dhruv Jurel", "Ravindra Jadeja",
+    "Riyan Parag", "Ravi Bishnoi", "Shubham Dubey", "Yudhvir Singh Charak",
+    "Tushar Deshpande",
+    "Abhishek Sharma", "Ishan Kishan", "Nitish Kumar Reddy", "Harshal Patel",
+    "Jaydev Unadkat", "Harsh Dubey", "Aniket Verma", "R Smaran",
+    "Rishabh Pant", "Mohammed Shami", "Mayank Yadav", "Avesh Khan",
+    "Mohsin Khan", "Abdul Samad", "Ayush Badoni", "Himmat Singh",
+    "Arshin Kulkarni", "Digvesh Rathi",
+    "Axar Patel", "KL Rahul", "Kuldeep Yadav", "T Natarajan",
+    "Karun Nair", "Ashutosh Sharma", "Vipraj Nigam", "Sameer Rizvi",
+    "Abishek Porel", "Nitish Rana", "Mukesh Kumar", "Prithvi Shaw",
+}
+
 # ── Data & Model ─────────────────────────────────────────────
 @st.cache_data
 def load_data():
@@ -70,16 +104,19 @@ VENUES = [
     "Rajiv Gandhi Stadium, Hyderabad",
     "Sawai Mansingh Stadium, Jaipur",
 ]
+TEAMS = ["All Teams", "CSK", "MI", "KKR", "RCB", "PBKS", "GT", "RR", "SRH", "LSG", "DC"]
 ROLES = ["Batsman", "Bowler", "All-Rounder", "Wicketkeeper-Batter"]
 
-pitch_type  = st.sidebar.selectbox("🏙️ Pitch Type", PITCH_TYPES)
-venue       = st.sidebar.selectbox("📍 Venue", VENUES)
-toss        = st.sidebar.radio("🪙 Toss Decision", ["Bat First", "Chase"])
-match_phase = st.sidebar.multiselect("⏱️ Match Phase Focus",
-                ["Powerplay", "Middle Overs", "Death Overs"],
-                default=["Powerplay", "Death Overs"])
-top_n       = st.sidebar.slider("🔝 Show Top N Players", 5, 20, 10)
-role_filter = st.sidebar.multiselect("🎯 Player Role Filter", ROLES, default=ROLES)
+pitch_type      = st.sidebar.selectbox("🏙️ Pitch Type", PITCH_TYPES)
+venue           = st.sidebar.selectbox("📍 Venue", VENUES)
+toss            = st.sidebar.radio("🪙 Toss Decision", ["Bat First", "Chase"])
+team_filter     = st.sidebar.selectbox("🛡️ Select Team", TEAMS)
+domestic_only   = st.sidebar.toggle("🇮🇳 Domestic Players Only", value=True)
+match_phase     = st.sidebar.multiselect("⏱️ Match Phase Focus",
+                    ["Powerplay", "Middle Overs", "Death Overs"],
+                    default=["Powerplay", "Death Overs"])
+top_n           = st.sidebar.slider("🔝 Show Top N Players", 5, 20, 10)
+role_filter     = st.sidebar.multiselect("🎯 Player Role Filter", ROLES, default=ROLES)
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📊 Pitch Intelligence")
@@ -98,10 +135,17 @@ st.sidebar.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+# ── Apply team + domestic filter to df before prediction ────────────────
+filtered_df = df.copy()
+if team_filter != "All Teams":
+    filtered_df = filtered_df[filtered_df['team'] == team_filter]
+if domestic_only:
+    filtered_df = filtered_df[filtered_df['player_name'].isin(INDIAN_PLAYERS)]
+
 # ── Predictions ──────────────────────────────────────────────
 try:
     predictions = predict_best_players(
-        df, model, label_encoders, feature_cols,
+        filtered_df, model, label_encoders, feature_cols,
         pitch_type=pitch_type, venue=venue,
         toss=toss, top_n=top_n, role_filter=role_filter
     )
@@ -113,12 +157,14 @@ tab1, tab2, tab3, tab4 = st.tabs(["🏆 Top Players", "📊 Analytics", "🗺️
 
 # ── Tab 1: Top Players ───────────────────────────────────────
 with tab1:
-    st.markdown(f"### 🏆 Best Players for **{pitch_type}** at {venue}")
+    team_label = f" — {team_filter}" if team_filter != "All Teams" else ""
+    domestic_label = " (Domestic Only 🇮🇳)" if domestic_only else ""
+    st.markdown(f"### 🏆 Best Players for **{pitch_type}** at {venue}{team_label}{domestic_label}")
     st.markdown(f"*Toss: {toss} | Phases: {', '.join(match_phase) if match_phase else 'All'}*")
     st.markdown("---")
 
     if predictions.empty:
-        st.warning("⚠️ No players found. Try adjusting the role filter.")
+        st.warning("⚠️ No players found. Try adjusting the team, role, or domestic filter.")
     else:
         col1, col2, col3, col4 = st.columns(4)
         with col1:
@@ -146,11 +192,13 @@ with tab1:
             ds_tag     = str(row['data_source']) if 'data_source' in row.index else 'real_ipl'
             ds_color   = ds_colors.get(ds_tag, '#aaa')
             ds_label   = ds_labels.get(ds_tag, ds_tag)
+            is_indian  = row['player_name'] in INDIAN_PLAYERS
+            flag       = " 🇮🇳" if is_indian else " 🌍"
 
             st.markdown(f"""
 <div class='player-card'>
   <span class='player-rank'>#{rank}</span>
-  <span class='player-name' style='margin-left:10px;font-size:1.15rem;font-weight:bold'>{str(row['player_name'])}</span>
+  <span class='player-name' style='margin-left:10px;font-size:1.15rem;font-weight:bold'>{str(row['player_name'])}{flag}</span>
   <span style='background:#e94560;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.8rem;margin-left:8px'>{str(row['role'])}</span>
   <span style='background:#0f3460;color:#a8dadc;padding:2px 8px;border-radius:12px;font-size:0.8rem;margin-left:4px'>{str(row['team'])}</span>
   <span style='background:{ds_color}22;color:{ds_color};padding:2px 8px;border-radius:12px;font-size:0.75rem;margin-left:4px'>{ds_label}</span>
@@ -226,9 +274,9 @@ with tab2:
 # ── Tab 3: Venue Stats ───────────────────────────────────────
 with tab3:
     st.markdown("### 🗺️ Venue Performance Analysis")
-    venue_df = df[df['venue'] == venue].copy()
+    venue_df = filtered_df[filtered_df['venue'] == venue].copy()
     if venue_df.empty:
-        st.info("No data found for this venue.")
+        st.info("No data found for this venue with current filters.")
     else:
         col1, col2 = st.columns(2)
         with col1:
@@ -299,6 +347,6 @@ with tab4:
 
 st.markdown("---")
 st.markdown(
-    "<center><span style='color:#555'>Built by Jyotheeswar Reddy · IPL Pitch Predictor v2.2 · DecisionTree + Streamlit</span></center>",
+    "<center><span style='color:#555'>Built by Jyotheeswar Reddy · IPL Pitch Predictor v2.3 · DecisionTree + Streamlit</span></center>",
     unsafe_allow_html=True
 )
