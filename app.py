@@ -255,7 +255,6 @@ with tab3:
             .head(20)
             .reset_index(drop=True)
         )
-        # Use .style.bar() — zero external dependencies (no matplotlib needed)
         st.dataframe(
             display_df.style.bar(
                 subset=['suitability_score'],
@@ -270,9 +269,10 @@ with tab4:
     st.markdown("### ℹ️ How the ML Model Works")
     st.markdown("""
     #### 🧠 Model Architecture
-    Uses a **Random Forest Regressor** trained on ~64,000 IPL 2025/2026 records enriched with:
+    Uses a **Decision Tree Regressor** (`max_depth=12`) trained on ~64,000 IPL 2025/2026 records enriched with:
     - Real batting avg, strike rate, economy, wickets per match per player
     - Pitch type, venue, toss encoding
+    - Venue × Pitch combo modifiers for ground-specific score adjustments
 
     #### 📐 Features
     | Feature | Description |
@@ -299,6 +299,6 @@ with tab4:
 
 st.markdown("---")
 st.markdown(
-    "<center><span style='color:#555'>Built by Jyotheeswar Reddy · IPL Pitch Predictor v2.1 · RandomForest + Streamlit</span></center>",
+    "<center><span style='color:#555'>Built by Jyotheeswar Reddy · IPL Pitch Predictor v2.2 · DecisionTree + Streamlit</span></center>",
     unsafe_allow_html=True
 )
