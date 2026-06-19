@@ -118,7 +118,7 @@ with tab1:
     st.markdown("---")
 
     if predictions.empty:
-        st.warning("⚠️ No players found for the selected filters. Try changing role filter.")
+        st.warning("⚠️ No players found. Try adjusting the role filter.")
     else:
         col1, col2, col3, col4 = st.columns(4)
         with col1:
@@ -139,32 +139,26 @@ with tab1:
         ds_labels = {'real_ipl': '✅ Real IPL', 'estimated_domestic': '📊 Estimated', 'role_based_fallback': '📌 Fallback'}
 
         for rank, (_, row) in enumerate(predictions.iterrows(), start=1):
-            score       = float(row['suitability_score'])
-            bar_filled  = max(0, min(10, int(score / 10)))
-            score_bar   = "█" * bar_filled + "░" * (10 - bar_filled)
-            reason      = str(row['reason'])      if 'reason'      in row.index else 'Strong performer on this surface.'
-            ds_tag      = str(row['data_source']) if 'data_source' in row.index else 'real_ipl'
-            ds_color    = ds_colors.get(ds_tag, '#aaa')
-            ds_label    = ds_labels.get(ds_tag, ds_tag)
-            player_name = str(row['player_name'])
-            role        = str(row['role'])
-            team        = str(row['team'])
-            bat_avg     = float(row['batting_avg'])
-            sr          = float(row['strike_rate'])
-            econ        = float(row['economy'])
+            score      = float(row['suitability_score'])
+            bar_filled = max(0, min(10, int(score / 10)))
+            score_bar  = "█" * bar_filled + "░" * (10 - bar_filled)
+            reason     = str(row['reason'])      if 'reason'      in row.index else 'Strong performer on this surface.'
+            ds_tag     = str(row['data_source']) if 'data_source' in row.index else 'real_ipl'
+            ds_color   = ds_colors.get(ds_tag, '#aaa')
+            ds_label   = ds_labels.get(ds_tag, ds_tag)
 
             st.markdown(f"""
 <div class='player-card'>
   <span class='player-rank'>#{rank}</span>
-  <span class='player-name' style='margin-left:10px;font-size:1.15rem;font-weight:bold'>{player_name}</span>
-  <span style='background:#e94560;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.8rem;margin-left:8px'>{role}</span>
-  <span style='background:#0f3460;color:#a8dadc;padding:2px 8px;border-radius:12px;font-size:0.8rem;margin-left:4px'>{team}</span>
+  <span class='player-name' style='margin-left:10px;font-size:1.15rem;font-weight:bold'>{str(row['player_name'])}</span>
+  <span style='background:#e94560;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.8rem;margin-left:8px'>{str(row['role'])}</span>
+  <span style='background:#0f3460;color:#a8dadc;padding:2px 8px;border-radius:12px;font-size:0.8rem;margin-left:4px'>{str(row['team'])}</span>
   <span style='background:{ds_color}22;color:{ds_color};padding:2px 8px;border-radius:12px;font-size:0.75rem;margin-left:4px'>{ds_label}</span>
   <br><br>
   <span class='player-score'>🎯 Suitability Score: <b>{score:.1f}/100</b></span>
-  &nbsp;|&nbsp; Avg: <b>{bat_avg:.1f}</b>
-  &nbsp;|&nbsp; SR: <b>{sr:.1f}</b>
-  &nbsp;|&nbsp; Economy: <b>{econ:.2f}</b>
+  &nbsp;|&nbsp; Avg: <b>{float(row['batting_avg']):.1f}</b>
+  &nbsp;|&nbsp; SR: <b>{float(row['strike_rate']):.1f}</b>
+  &nbsp;|&nbsp; Economy: <b>{float(row['economy']):.2f}</b>
   <br>
   <span style='color:#888;font-family:monospace'>{score_bar}</span>
   <br><span style='color:#a8dadc;font-size:0.88rem'>💡 {reason}</span>
@@ -188,7 +182,6 @@ with tab2:
             )
             fig_bar.update_layout(yaxis={'categoryorder': 'total ascending'}, height=450, template='plotly_dark')
             st.plotly_chart(fig_bar, use_container_width=True)
-
         with col2:
             fig_scatter = px.scatter(
                 predictions, x='batting_avg', y='strike_rate',
@@ -202,14 +195,12 @@ with tab2:
 
         col3, col4 = st.columns(2)
         with col3:
-            # Pandas 2.x compatible value_counts
             role_counts = predictions['role'].value_counts().rename_axis('Role').reset_index(name='Count')
             fig_pie = px.pie(role_counts, names='Role', values='Count',
                              title='Role Distribution in Top Picks',
                              color_discrete_sequence=px.colors.qualitative.Set2,
                              template='plotly_dark')
             st.plotly_chart(fig_pie, use_container_width=True)
-
         with col4:
             fig_radar = go.Figure()
             for _, row in predictions.head(5).iterrows():
@@ -264,8 +255,13 @@ with tab3:
             .head(20)
             .reset_index(drop=True)
         )
+        # Use .style.bar() — zero external dependencies (no matplotlib needed)
         st.dataframe(
-            display_df.style.background_gradient(subset=['suitability_score'], cmap='YlOrRd'),
+            display_df.style.bar(
+                subset=['suitability_score'],
+                color='#e94560',
+                vmin=0, vmax=100
+            ),
             use_container_width=True
         )
 
