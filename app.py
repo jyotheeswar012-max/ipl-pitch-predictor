@@ -42,19 +42,19 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── Data & Model (cache safely) ──────────────────────────────
+# ── Data & Model ─────────────────────────────────────────────
 @st.cache_data
 def load_data():
     return generate_ipl_dataset()
 
 @st.cache_data
 def load_model_cached():
-    """Train model independently so cache hash is stable."""
     _df = generate_ipl_dataset()
     return train_model(_df)
 
-df = load_data()
-model, label_encoders, feature_cols = load_model_cached()
+with st.spinner("⏳ Loading IPL data and training model..."):
+    df = load_data()
+    model, label_encoders, feature_cols = load_model_cached()
 
 # ── Sidebar ──────────────────────────────────────────────────
 st.sidebar.header("⚙️ Match Conditions")
@@ -99,11 +99,15 @@ st.sidebar.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── Predictions ──────────────────────────────────────────────
-predictions = predict_best_players(
-    df, model, label_encoders, feature_cols,
-    pitch_type=pitch_type, venue=venue,
-    toss=toss, top_n=top_n, role_filter=role_filter
-)
+try:
+    predictions = predict_best_players(
+        df, model, label_encoders, feature_cols,
+        pitch_type=pitch_type, venue=venue,
+        toss=toss, top_n=top_n, role_filter=role_filter
+    )
+except Exception as e:
+    st.error(f"❌ Prediction error: {e}")
+    st.stop()
 
 tab1, tab2, tab3, tab4 = st.tabs(["🏆 Top Players", "📊 Analytics", "🗺️ Venue Stats", "ℹ️ How It Works"])
 
@@ -113,40 +117,54 @@ with tab1:
     st.markdown(f"*Toss: {toss} | Phases: {', '.join(match_phase) if match_phase else 'All'}*")
     st.markdown("---")
 
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.markdown(f"<div class='metric-box'><b style='color:#e94560;font-size:1.5rem'>{len(predictions)}</b><br><span style='color:#aaa'>Players Ranked</span></div>", unsafe_allow_html=True)
-    with col2:
-        avg_score = predictions['suitability_score'].mean() if not predictions.empty else 0
-        st.markdown(f"<div class='metric-box'><b style='color:#00d4aa;font-size:1.5rem'>{avg_score:.1f}</b><br><span style='color:#aaa'>Avg Score</span></div>", unsafe_allow_html=True)
-    with col3:
-        top_player = predictions.iloc[0]['player_name'] if not predictions.empty else 'N/A'
-        st.markdown(f"<div class='metric-box'><b style='color:#ffd700;font-size:1rem'>{top_player}</b><br><span style='color:#aaa'>Top Pick</span></div>", unsafe_allow_html=True)
-    with col4:
-        top_role = predictions.iloc[0]['role'] if not predictions.empty else 'N/A'
-        st.markdown(f"<div class='metric-box'><b style='color:#a78bfa;font-size:1rem'>{top_role}</b><br><span style='color:#aaa'>Top Role</span></div>", unsafe_allow_html=True)
+    if predictions.empty:
+        st.warning("⚠️ No players found for the selected filters. Try changing role filter.")
+    else:
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.markdown(f"<div class='metric-box'><b style='color:#e94560;font-size:1.5rem'>{len(predictions)}</b><br><span style='color:#aaa'>Players Ranked</span></div>", unsafe_allow_html=True)
+        with col2:
+            avg_score = round(float(predictions['suitability_score'].mean()), 1)
+            st.markdown(f"<div class='metric-box'><b style='color:#00d4aa;font-size:1.5rem'>{avg_score}</b><br><span style='color:#aaa'>Avg Score</span></div>", unsafe_allow_html=True)
+        with col3:
+            top_player = str(predictions.iloc[0]['player_name'])
+            st.markdown(f"<div class='metric-box'><b style='color:#ffd700;font-size:1rem'>{top_player}</b><br><span style='color:#aaa'>Top Pick</span></div>", unsafe_allow_html=True)
+        with col4:
+            top_role = str(predictions.iloc[0]['role'])
+            st.markdown(f"<div class='metric-box'><b style='color:#a78bfa;font-size:1rem'>{top_role}</b><br><span style='color:#aaa'>Top Role</span></div>", unsafe_allow_html=True)
 
-    st.markdown("---")
+        st.markdown("---")
 
-    for i, row in predictions.iterrows():
-        rank = i + 1
-        score_bar = "█" * int(row['suitability_score'] / 10) + "░" * (10 - int(row['suitability_score'] / 10))
-        reason = row.get('reason', 'Strong historical performance on this surface.')
-        ds_tag = row.get('data_source', 'real_ipl')
-        ds_color = {'real_ipl': '#00d4aa', 'estimated_domestic': '#ffd700', 'role_based_fallback': '#ff7043'}.get(ds_tag, '#aaa')
-        ds_label = {'real_ipl': '✅ Real IPL', 'estimated_domestic': '📊 Estimated', 'role_based_fallback': '📌 Fallback'}.get(ds_tag, ds_tag)
-        st.markdown(f"""
+        ds_colors = {'real_ipl': '#00d4aa', 'estimated_domestic': '#ffd700', 'role_based_fallback': '#ff7043'}
+        ds_labels = {'real_ipl': '✅ Real IPL', 'estimated_domestic': '📊 Estimated', 'role_based_fallback': '📌 Fallback'}
+
+        for rank, (_, row) in enumerate(predictions.iterrows(), start=1):
+            score       = float(row['suitability_score'])
+            bar_filled  = max(0, min(10, int(score / 10)))
+            score_bar   = "█" * bar_filled + "░" * (10 - bar_filled)
+            reason      = str(row['reason'])      if 'reason'      in row.index else 'Strong performer on this surface.'
+            ds_tag      = str(row['data_source']) if 'data_source' in row.index else 'real_ipl'
+            ds_color    = ds_colors.get(ds_tag, '#aaa')
+            ds_label    = ds_labels.get(ds_tag, ds_tag)
+            player_name = str(row['player_name'])
+            role        = str(row['role'])
+            team        = str(row['team'])
+            bat_avg     = float(row['batting_avg'])
+            sr          = float(row['strike_rate'])
+            econ        = float(row['economy'])
+
+            st.markdown(f"""
 <div class='player-card'>
   <span class='player-rank'>#{rank}</span>
-  <span class='player-name' style='margin-left:10px;font-size:1.15rem;font-weight:bold'>{row['player_name']}</span>
-  <span style='background:#e94560;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.8rem;margin-left:8px'>{row['role']}</span>
-  <span style='background:#0f3460;color:#a8dadc;padding:2px 8px;border-radius:12px;font-size:0.8rem;margin-left:4px'>{row['team']}</span>
+  <span class='player-name' style='margin-left:10px;font-size:1.15rem;font-weight:bold'>{player_name}</span>
+  <span style='background:#e94560;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.8rem;margin-left:8px'>{role}</span>
+  <span style='background:#0f3460;color:#a8dadc;padding:2px 8px;border-radius:12px;font-size:0.8rem;margin-left:4px'>{team}</span>
   <span style='background:{ds_color}22;color:{ds_color};padding:2px 8px;border-radius:12px;font-size:0.75rem;margin-left:4px'>{ds_label}</span>
   <br><br>
-  <span class='player-score'>🎯 Suitability Score: <b>{row['suitability_score']:.1f}/100</b></span>
-  &nbsp;|&nbsp; Avg: <b>{row['batting_avg']:.1f}</b>
-  &nbsp;|&nbsp; SR: <b>{row['strike_rate']:.1f}</b>
-  &nbsp;|&nbsp; Economy: <b>{row['economy']:.2f}</b>
+  <span class='player-score'>🎯 Suitability Score: <b>{score:.1f}/100</b></span>
+  &nbsp;|&nbsp; Avg: <b>{bat_avg:.1f}</b>
+  &nbsp;|&nbsp; SR: <b>{sr:.1f}</b>
+  &nbsp;|&nbsp; Economy: <b>{econ:.2f}</b>
   <br>
   <span style='color:#888;font-family:monospace'>{score_bar}</span>
   <br><span style='color:#a8dadc;font-size:0.88rem'>💡 {reason}</span>
@@ -156,7 +174,9 @@ with tab1:
 # ── Tab 2: Analytics ─────────────────────────────────────────
 with tab2:
     st.markdown("### 📊 Player Suitability Analytics")
-    if not predictions.empty:
+    if predictions.empty:
+        st.info("Select players using the sidebar filters to see analytics.")
+    else:
         col1, col2 = st.columns(2)
         with col1:
             fig_bar = px.bar(
@@ -168,6 +188,7 @@ with tab2:
             )
             fig_bar.update_layout(yaxis={'categoryorder': 'total ascending'}, height=450, template='plotly_dark')
             st.plotly_chart(fig_bar, use_container_width=True)
+
         with col2:
             fig_scatter = px.scatter(
                 predictions, x='batting_avg', y='strike_rate',
@@ -181,26 +202,28 @@ with tab2:
 
         col3, col4 = st.columns(2)
         with col3:
-            role_counts = predictions['role'].value_counts().reset_index()
-            role_counts.columns = ['Role', 'Count']
+            # Pandas 2.x compatible value_counts
+            role_counts = predictions['role'].value_counts().rename_axis('Role').reset_index(name='Count')
             fig_pie = px.pie(role_counts, names='Role', values='Count',
                              title='Role Distribution in Top Picks',
                              color_discrete_sequence=px.colors.qualitative.Set2,
                              template='plotly_dark')
             st.plotly_chart(fig_pie, use_container_width=True)
+
         with col4:
             fig_radar = go.Figure()
             for _, row in predictions.head(5).iterrows():
                 fig_radar.add_trace(go.Scatterpolar(
                     r=[
-                        min(row['batting_avg'] / 60 * 100, 100),
-                        min(row['strike_rate'] / 200 * 100, 100),
-                        max(0, (1 - row['economy'] / 12) * 100),
-                        row['suitability_score'],
-                        min(row['wickets_per_match'] * 50, 100)
+                        min(float(row['batting_avg'])  / 60  * 100, 100),
+                        min(float(row['strike_rate'])  / 200 * 100, 100),
+                        max(0.0, (1 - float(row['economy']) / 12) * 100),
+                        float(row['suitability_score']),
+                        min(float(row['wickets_per_match']) * 50, 100)
                     ],
                     theta=['Batting Avg', 'Strike Rate', 'Economy', 'Suitability', 'Wickets/Match'],
-                    fill='toself', name=row['player_name']
+                    fill='toself',
+                    name=str(row['player_name'])
                 ))
             fig_radar.update_layout(
                 polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
@@ -212,33 +235,37 @@ with tab2:
 # ── Tab 3: Venue Stats ───────────────────────────────────────
 with tab3:
     st.markdown("### 🗺️ Venue Performance Analysis")
-    venue_df = df[df['venue'] == venue]
-    if not venue_df.empty:
+    venue_df = df[df['venue'] == venue].copy()
+    if venue_df.empty:
+        st.info("No data found for this venue.")
+    else:
         col1, col2 = st.columns(2)
         with col1:
-            avg_score_venue = venue_df.groupby('pitch_type')['match_score'].mean().reset_index()
+            avg_score_venue = venue_df.groupby('pitch_type', as_index=False)['match_score'].mean()
             fig_v = px.bar(avg_score_venue, x='pitch_type', y='match_score',
-                           title=f'Avg Match Score by Pitch Type at {venue.split(",")[0]}',
+                           title=f'Avg Match Score by Pitch — {venue.split(",")[0]}',
                            template='plotly_dark', color='match_score',
                            color_continuous_scale='Blues')
             st.plotly_chart(fig_v, use_container_width=True)
         with col2:
-            role_perf = venue_df.groupby('role')['suitability_score'].mean().reset_index()
+            role_perf = venue_df.groupby('role', as_index=False)['suitability_score'].mean()
             fig_r = px.bar(role_perf, x='role', y='suitability_score',
-                           title=f'Avg Suitability by Role at {venue.split(",")[0]}',
+                           title=f'Avg Suitability by Role — {venue.split(",")[0]}',
                            template='plotly_dark', color='suitability_score',
                            color_continuous_scale='Reds')
             st.plotly_chart(fig_r, use_container_width=True)
 
-        show_cols = ['player_name', 'role', 'team', 'data_source', 'pitch_type',
-                     'batting_avg', 'strike_rate', 'economy', 'suitability_score']
-        # Only include data_source column if it exists
-        show_cols = [c for c in show_cols if c in venue_df.columns]
-        st.dataframe(
+        all_cols   = ['player_name', 'role', 'team', 'data_source', 'pitch_type',
+                      'batting_avg', 'strike_rate', 'economy', 'suitability_score']
+        show_cols  = [c for c in all_cols if c in venue_df.columns]
+        display_df = (
             venue_df[show_cols]
             .sort_values('suitability_score', ascending=False)
             .head(20)
-            .style.background_gradient(subset=['suitability_score'], cmap='YlOrRd'),
+            .reset_index(drop=True)
+        )
+        st.dataframe(
+            display_df.style.background_gradient(subset=['suitability_score'], cmap='YlOrRd'),
             use_container_width=True
         )
 
@@ -247,19 +274,17 @@ with tab4:
     st.markdown("### ℹ️ How the ML Model Works")
     st.markdown("""
     #### 🧠 Model Architecture
-    This app uses a **Random Forest Regressor** trained on IPL 2025/2026 data enriched with:
-    - Real batting avg, strike rate, economy, wickets per match
-    - Pitch type encoding (5 types)
-    - Venue encoding (8 venues)
-    - Toss decision (bat/chase)
+    Uses a **Random Forest Regressor** trained on ~64,000 IPL 2025/2026 records enriched with:
+    - Real batting avg, strike rate, economy, wickets per match per player
+    - Pitch type, venue, toss encoding
 
-    #### 📐 Feature Engineering
+    #### 📐 Features
     | Feature | Description |
     |---|---|
     | `batting_avg` | Historical average runs per innings |
     | `strike_rate` | Runs per 100 balls |
     | `economy` | Runs conceded per over |
-    | `wickets_per_match` | Average wickets taken per match |
+    | `wickets_per_match` | Average wickets per match |
     | `pitch_encoded` | Label-encoded pitch type |
     | `venue_encoded` | Label-encoded venue |
     | `toss_encoded` | Bat first = 1, Chase = 0 |
@@ -268,13 +293,16 @@ with tab4:
     #### 🎯 Data Source Tags
     | Tag | Meaning |
     |---|---|
-    | ✅ Real IPL | Verified IPL 2025/2026 season stats |
-    | 📊 Estimated | Domestic T20 / Ranji-based estimates |
-    | 📌 Fallback | New/uncapped player — role-average profile |
+    | ✅ Real IPL | Verified IPL 2025/2026 stats |
+    | 📊 Estimated | Domestic T20/Ranji estimates |
+    | 📌 Fallback | Uncapped player — role-average profile |
 
     #### 📦 Coverage
-    All **10 IPL 2026 teams** | **200+ players** | **~64,000 records**
+    **10 teams** | **200+ players** | **~64,000 records**
     """)
 
 st.markdown("---")
-st.markdown("<center><span style='color:#555'>Built by Jyotheeswar Reddy | IPL Pitch Predictor v2.0 | Powered by RandomForest + Streamlit</span></center>", unsafe_allow_html=True)
+st.markdown(
+    "<center><span style='color:#555'>Built by Jyotheeswar Reddy · IPL Pitch Predictor v2.1 · RandomForest + Streamlit</span></center>",
+    unsafe_allow_html=True
+)
