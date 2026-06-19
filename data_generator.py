@@ -2,6 +2,12 @@ import pandas as pd
 import numpy as np
 
 # ────────────────────────────────────────────────────────────────────────────────
+# Dataset size guarantee:
+#   81 players × 5 pitch types × 8 venues × 2 toss options × 4 records = 25,920 rows
+#   This comfortably exceeds the MIN_DATASET_ROWS = 700 requirement.
+# ────────────────────────────────────────────────────────────────────────────────
+MIN_DATASET_ROWS = 700
+
 REAL_PLAYER_STATS = {
 
     # ══ CHENNAI SUPER KINGS (CSK) ═══════════════════════════════════════════
@@ -352,4 +358,9 @@ def generate_ipl_dataset(n_records_per_combo: int = 4, seed: int = 42):
                             "match_score":       round(float(rng.normal(162, 22)), 1),
                             "suitability_score": suit,
                         })
-    return pd.DataFrame(rows)
+    df = pd.DataFrame(rows)
+    assert len(df) >= MIN_DATASET_ROWS, (
+        f"Dataset has only {len(df)} rows — must be >= {MIN_DATASET_ROWS}. "
+        f"Increase n_records_per_combo or add more players."
+    )
+    return df
