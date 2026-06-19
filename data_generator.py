@@ -99,6 +99,26 @@ REAL_PLAYER_STATS = {
     "Abishek Porel":       {"batting_avg":20.00,"strike_rate":152.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"DC","data_source":"estimated_domestic"},
     "Mukesh Kumar":        {"batting_avg":5.00, "strike_rate":65.00, "economy":9.10,"wickets_per_match":1.1,"role":"Bowler",             "team":"DC","data_source":"real_ipl"},
     "Yash Dhull":          {"batting_avg":22.00,"strike_rate":148.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"estimated_domestic"},
+
+    # ══ IPL 2025 AUCTION UNSOLD — UNCAPPED INDIANS ═════════════════════════════════════════════
+    # Batsmen / WK-Batters
+    "Prithvi Shaw":        {"batting_avg":23.95,"strike_rate":147.47,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"UNSOLD","data_source":"real_ipl"},
+    "Anmolpreet Singh":    {"batting_avg":20.00,"strike_rate":138.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"UNSOLD","data_source":"estimated_domestic"},
+    "Upendra Yadav":       {"batting_avg":18.00,"strike_rate":145.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"UNSOLD","data_source":"estimated_domestic"},
+    "Luvnith Sisodia":     {"batting_avg":16.00,"strike_rate":140.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"UNSOLD","data_source":"estimated_domestic"},
+    "Lalit Yadav":         {"batting_avg":18.00,"strike_rate":140.00,"economy":8.80,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"UNSOLD","data_source":"real_ipl"},
+    "Mayank Agarwal":      {"batting_avg":26.00,"strike_rate":140.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"UNSOLD","data_source":"real_ipl"},
+    # Bowlers
+    "Kartik Tyagi":        {"batting_avg":5.00, "strike_rate":65.00, "economy":9.30,"wickets_per_match":1.0,"role":"Bowler",             "team":"UNSOLD","data_source":"real_ipl"},
+    "Chetan Sakariya":     {"batting_avg":5.00, "strike_rate":65.00, "economy":9.00,"wickets_per_match":1.1,"role":"Bowler",             "team":"UNSOLD","data_source":"real_ipl"},
+    "Navdeep Saini":       {"batting_avg":5.00, "strike_rate":65.00, "economy":9.50,"wickets_per_match":1.0,"role":"Bowler",             "team":"UNSOLD","data_source":"real_ipl"},
+    "Vidwath Kaverappa":   {"batting_avg":5.00, "strike_rate":65.00, "economy":9.20,"wickets_per_match":1.1,"role":"Bowler",             "team":"UNSOLD","data_source":"estimated_domestic"},
+    "Rajan Kumar":         {"batting_avg":5.00, "strike_rate":65.00, "economy":9.10,"wickets_per_match":1.0,"role":"Bowler",             "team":"UNSOLD","data_source":"estimated_domestic"},
+    "Piyush Chawla":       {"batting_avg":6.00, "strike_rate":72.00, "economy":8.00,"wickets_per_match":1.1,"role":"Bowler",             "team":"UNSOLD","data_source":"real_ipl"},
+    # All-Rounders
+    "Utkarsh Singh":       {"batting_avg":16.00,"strike_rate":145.00,"economy":9.20,"wickets_per_match":0.6,"role":"All-Rounder",        "team":"UNSOLD","data_source":"estimated_domestic"},
+    "Mayank Dagar":        {"batting_avg":14.00,"strike_rate":130.00,"economy":8.50,"wickets_per_match":0.8,"role":"All-Rounder",        "team":"UNSOLD","data_source":"estimated_domestic"},
+    "Prince Chaudhary":    {"batting_avg":16.00,"strike_rate":142.00,"economy":9.00,"wickets_per_match":0.6,"role":"All-Rounder",        "team":"UNSOLD","data_source":"estimated_domestic"},
 }
 
 PLAYERS = [(name, stats["role"], stats["team"]) for name, stats in REAL_PLAYER_STATS.items()]
@@ -186,7 +206,7 @@ PITCH_ROLE_WEIGHTS = {
 
 # ── PLAYER_MODIFIERS (uncapped Indian players only) ──────────────────────────────────
 PLAYER_MODIFIERS = {
-    # ─ Batsmen
+    # ─ Batsmen (signed)
     "Vaibhav Sooryavanshi": {"Flat/Batting": 0.20, "Hard/True Bounce": 0.18},
     "Sai Sudharsan":        {"Flat/Batting": 0.14, "Slow/Dry Spin": 0.10},
     "Priyansh Arya":        {"Flat/Batting": 0.16, "Hard/True Bounce": 0.12},
@@ -202,20 +222,34 @@ PLAYER_MODIFIERS = {
     "Shahrukh Khan":        {"Flat/Batting": 0.10, "Wet/Dew Heavy": 0.10},
     "Riyan Parag":          {"Slow/Dry Spin": 0.10, "Flat/Batting": 0.08},
     "Nitish Kumar Reddy":   {"Flat/Batting": 0.10, "Hard/True Bounce": 0.08},
-    # ─ Bowlers
+    # ─ Batsmen (unsold)
+    "Prithvi Shaw":         {"Flat/Batting": 0.12, "Hard/True Bounce": 0.10},
+    "Mayank Agarwal":       {"Flat/Batting": 0.10, "Hard/True Bounce": 0.08},
+    "Lalit Yadav":          {"Flat/Batting": 0.08, "Slow/Dry Spin": 0.06},
+    # ─ Bowlers (signed)
     "Sai Kishore":          {"Slow/Dry Spin": 0.16, "Flat/Batting": 0.06},
     "Yash Dayal":           {"Green/Grassy": 0.10, "Wet/Dew Heavy": 0.08},
     "Anshul Kamboj":        {"Green/Grassy": 0.10, "Hard/True Bounce": 0.08},
     "Harsh Dubey":          {"Slow/Dry Spin": 0.10, "Green/Grassy": 0.08},
     "Vyshak Vijaykumar":    {"Green/Grassy": 0.10, "Hard/True Bounce": 0.08},
     "Gurnoor Singh Brar":   {"Green/Grassy": 0.10, "Hard/True Bounce": 0.08},
-    # ─ All-rounders
+    # ─ Bowlers (unsold)
+    "Kartik Tyagi":         {"Green/Grassy": 0.10, "Hard/True Bounce": 0.10},
+    "Chetan Sakariya":      {"Green/Grassy": 0.10, "Wet/Dew Heavy": 0.08},
+    "Navdeep Saini":        {"Hard/True Bounce": 0.10, "Green/Grassy": 0.08},
+    "Piyush Chawla":        {"Slow/Dry Spin": 0.14, "Flat/Batting": 0.06},
+    "Vidwath Kaverappa":    {"Green/Grassy": 0.10, "Hard/True Bounce": 0.08},
+    # ─ All-rounders (signed)
     "Rahul Tewatia":        {"Flat/Batting": 0.10, "Wet/Dew Heavy": 0.08},
     "Harpreet Brar":        {"Slow/Dry Spin": 0.10, "Flat/Batting": 0.06},
     "Nishant Sindhu":       {"Flat/Batting": 0.08, "Slow/Dry Spin": 0.06},
     "Ashutosh Sharma":      {"Flat/Batting": 0.10, "Hard/True Bounce": 0.08},
     "Vipraj Nigam":         {"Flat/Batting": 0.08, "Slow/Dry Spin": 0.06},
     "Arshin Kulkarni":      {"Slow/Dry Spin": 0.08, "Flat/Batting": 0.06},
+    # ─ All-rounders (unsold)
+    "Utkarsh Singh":        {"Flat/Batting": 0.08, "Hard/True Bounce": 0.06},
+    "Mayank Dagar":         {"Slow/Dry Spin": 0.10, "Flat/Batting": 0.06},
+    "Prince Chaudhary":     {"Flat/Batting": 0.08, "Slow/Dry Spin": 0.06},
 }
 
 
