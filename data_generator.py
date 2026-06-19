@@ -2,245 +2,217 @@ import pandas as pd
 import numpy as np
 
 # ─────────────────────────────────────────────────────────────────────────────
-# COMPLETE IPL 2026 SQUAD DATA — ALL 10 TEAMS
-# Sources: NDTV Sports, Cricbuzz, ESPN Cricinfo, Mykhel, Olympics.com
-# data_source key:
-#   "real_ipl"           → verified stats from IPL 2025/2026 seasons
-#   "estimated_domestic" → domestic T20 / Ranji-based estimate
-#   "role_based_fallback"→ new/uncapped player, role-average profile used
+# COMPLETE IPL 2026 SQUAD DATA — ALL 10 TEAMS (duplicate-free)
+# Sources: NDTV Sports, Cricbuzz, ESPN Cricinfo, Olympics.com
+# data_source:
+#   "real_ipl"            -> verified IPL 2025/2026 stats
+#   "estimated_domestic"  -> domestic T20 / Ranji estimate
+#   "role_based_fallback" -> new/uncapped, role-average profile
+# NOTE: Each player appears exactly once (team = IPL 2026 squad team)
 # ─────────────────────────────────────────────────────────────────────────────
 REAL_PLAYER_STATS = {
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # CHENNAI SUPER KINGS (CSK)
-    # ══════════════════════════════════════════════════════════════════════════
-    "Ruturaj Gaikwad":    {"batting_avg":35.00,"strike_rate":140.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"CSK","data_source":"real_ipl"},
-    "Ayush Mhatre":       {"batting_avg":34.29,"strike_rate":188.97,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"CSK","data_source":"real_ipl"},
-    "MS Dhoni":           {"batting_avg":24.00,"strike_rate":178.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"CSK","data_source":"real_ipl"},
-    "Dewald Brevis":      {"batting_avg":30.00,"strike_rate":180.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"CSK","data_source":"real_ipl"},
-    "Urvil Patel":        {"batting_avg":22.67,"strike_rate":201.56,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"CSK","data_source":"real_ipl"},
-    "Shivam Dube":        {"batting_avg":32.00,"strike_rate":162.00,"economy":9.80,"wickets_per_match":0.4,"role":"All-Rounder",        "team":"CSK","data_source":"real_ipl"},
-    "Sanju Samson":       {"batting_avg":34.13,"strike_rate":151.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"CSK","data_source":"real_ipl"},
-    "Noor Ahmad":         {"batting_avg":5.00, "strike_rate":70.00, "economy":8.20,"wickets_per_match":1.5,"role":"Bowler",             "team":"CSK","data_source":"real_ipl"},
-    "Khaleel Ahmed":      {"batting_avg":5.00, "strike_rate":68.00, "economy":8.90,"wickets_per_match":1.1,"role":"Bowler",             "team":"CSK","data_source":"real_ipl"},
-    "Anshul Kamboj":      {"batting_avg":8.00, "strike_rate":85.00, "economy":9.30,"wickets_per_match":1.0,"role":"Bowler",             "team":"CSK","data_source":"estimated_domestic"},
-    "Shreyas Gopal":      {"batting_avg":7.00, "strike_rate":80.00, "economy":8.40,"wickets_per_match":1.1,"role":"Bowler",             "team":"CSK","data_source":"estimated_domestic"},
-    "Mukesh Choudhary":   {"batting_avg":5.00, "strike_rate":65.00, "economy":9.00,"wickets_per_match":1.0,"role":"Bowler",             "team":"CSK","data_source":"real_ipl"},
-    "Kartik Sharma":      {"batting_avg":22.00,"strike_rate":165.00,"economy":8.80,"wickets_per_match":0.6,"role":"All-Rounder",        "team":"CSK","data_source":"estimated_domestic"},
-    "Prashant Veer":      {"batting_avg":8.00, "strike_rate":90.00, "economy":9.40,"wickets_per_match":1.2,"role":"Bowler",             "team":"CSK","data_source":"estimated_domestic"},
-    "Rahul Chahar":       {"batting_avg":6.00, "strike_rate":75.00, "economy":8.20,"wickets_per_match":1.2,"role":"Bowler",             "team":"CSK","data_source":"real_ipl"},
-    "Jamie Overton":      {"batting_avg":16.00,"strike_rate":145.00,"economy":9.20,"wickets_per_match":0.8,"role":"All-Rounder",        "team":"CSK","data_source":"estimated_domestic"},
-    "Nathan Ellis":       {"batting_avg":5.00, "strike_rate":70.00, "economy":9.10,"wickets_per_match":1.1,"role":"Bowler",             "team":"CSK","data_source":"real_ipl"},
-    "Matt Henry":         {"batting_avg":6.00, "strike_rate":72.00, "economy":8.80,"wickets_per_match":1.2,"role":"Bowler",             "team":"CSK","data_source":"estimated_domestic"},
-    "Matthew Short":      {"batting_avg":28.00,"strike_rate":170.00,"economy":8.60,"wickets_per_match":0.4,"role":"All-Rounder",        "team":"CSK","data_source":"estimated_domestic"},
-    "Sarfaraz Khan":      {"batting_avg":26.00,"strike_rate":162.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"CSK","data_source":"estimated_domestic"},
-    "Ramakrishna Ghosh":  {"batting_avg":18.00,"strike_rate":150.00,"economy":8.50,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"CSK","data_source":"role_based_fallback"},
-    "Gurjapneet Singh":   {"batting_avg":5.00, "strike_rate":65.00, "economy":9.20,"wickets_per_match":0.9,"role":"Bowler",             "team":"CSK","data_source":"role_based_fallback"},
-    "Akeal Hosein":       {"batting_avg":14.00,"strike_rate":130.00,"economy":7.90,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"CSK","data_source":"estimated_domestic"},
-    "Zakary Foulkes":     {"batting_avg":5.00, "strike_rate":68.00, "economy":9.30,"wickets_per_match":1.0,"role":"Bowler",             "team":"CSK","data_source":"role_based_fallback"},
+    # ══ CHENNAI SUPER KINGS (CSK) ═══════════════════════════════════════════
+    "Ruturaj Gaikwad":     {"batting_avg":35.00,"strike_rate":140.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"CSK","data_source":"real_ipl"},
+    "Ayush Mhatre":        {"batting_avg":34.29,"strike_rate":188.97,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"CSK","data_source":"real_ipl"},
+    "MS Dhoni":            {"batting_avg":24.00,"strike_rate":178.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"CSK","data_source":"real_ipl"},
+    "Dewald Brevis":       {"batting_avg":30.00,"strike_rate":180.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"CSK","data_source":"real_ipl"},
+    "Urvil Patel":         {"batting_avg":22.67,"strike_rate":201.56,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"CSK","data_source":"real_ipl"},
+    "Shivam Dube":         {"batting_avg":32.00,"strike_rate":162.00,"economy":9.80,"wickets_per_match":0.4,"role":"All-Rounder",        "team":"CSK","data_source":"real_ipl"},
+    "Sanju Samson":        {"batting_avg":34.13,"strike_rate":151.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"CSK","data_source":"real_ipl"},
+    "Noor Ahmad":          {"batting_avg":5.00, "strike_rate":70.00, "economy":8.20,"wickets_per_match":1.5,"role":"Bowler",             "team":"CSK","data_source":"real_ipl"},
+    "Khaleel Ahmed":       {"batting_avg":5.00, "strike_rate":68.00, "economy":8.90,"wickets_per_match":1.1,"role":"Bowler",             "team":"CSK","data_source":"real_ipl"},
+    "Anshul Kamboj":       {"batting_avg":8.00, "strike_rate":85.00, "economy":9.30,"wickets_per_match":1.0,"role":"Bowler",             "team":"CSK","data_source":"estimated_domestic"},
+    "Shreyas Gopal":       {"batting_avg":7.00, "strike_rate":80.00, "economy":8.40,"wickets_per_match":1.1,"role":"Bowler",             "team":"CSK","data_source":"estimated_domestic"},
+    "Mukesh Choudhary":    {"batting_avg":5.00, "strike_rate":65.00, "economy":9.00,"wickets_per_match":1.0,"role":"Bowler",             "team":"CSK","data_source":"real_ipl"},
+    "Kartik Sharma":       {"batting_avg":22.00,"strike_rate":165.00,"economy":8.80,"wickets_per_match":0.6,"role":"All-Rounder",        "team":"CSK","data_source":"estimated_domestic"},
+    "Rahul Chahar":        {"batting_avg":6.00, "strike_rate":75.00, "economy":8.20,"wickets_per_match":1.2,"role":"Bowler",             "team":"CSK","data_source":"real_ipl"},
+    "Nathan Ellis":        {"batting_avg":5.00, "strike_rate":70.00, "economy":9.10,"wickets_per_match":1.1,"role":"Bowler",             "team":"CSK","data_source":"real_ipl"},
+    "Matt Henry":          {"batting_avg":6.00, "strike_rate":72.00, "economy":8.80,"wickets_per_match":1.2,"role":"Bowler",             "team":"CSK","data_source":"estimated_domestic"},
+    "Matthew Short":       {"batting_avg":28.00,"strike_rate":170.00,"economy":8.60,"wickets_per_match":0.4,"role":"All-Rounder",        "team":"CSK","data_source":"estimated_domestic"},
+    "Sarfaraz Khan":       {"batting_avg":26.00,"strike_rate":162.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"CSK","data_source":"estimated_domestic"},
+    "Ramakrishna Ghosh":   {"batting_avg":18.00,"strike_rate":150.00,"economy":8.50,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"CSK","data_source":"role_based_fallback"},
+    "Gurjapneet Singh":    {"batting_avg":5.00, "strike_rate":65.00, "economy":9.20,"wickets_per_match":0.9,"role":"Bowler",             "team":"CSK","data_source":"role_based_fallback"},
+    "Akeal Hosein":        {"batting_avg":14.00,"strike_rate":130.00,"economy":7.90,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"CSK","data_source":"estimated_domestic"},
+    "Zakary Foulkes":      {"batting_avg":5.00, "strike_rate":68.00, "economy":9.30,"wickets_per_match":1.0,"role":"Bowler",             "team":"CSK","data_source":"role_based_fallback"},
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # MUMBAI INDIANS (MI)
-    # ══════════════════════════════════════════════════════════════════════════
-    "Rohit Sharma":       {"batting_avg":30.20,"strike_rate":139.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"MI","data_source":"real_ipl"},
-    "Suryakumar Yadav":   {"batting_avg":65.18,"strike_rate":167.92,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"MI","data_source":"real_ipl"},
-    "Tilak Varma":        {"batting_avg":34.50,"strike_rate":158.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"MI","data_source":"real_ipl"},
-    "Ryan Rickelton":     {"batting_avg":40.72,"strike_rate":186.66,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"MI","data_source":"real_ipl"},
-    "Hardik Pandya":      {"batting_avg":28.00,"strike_rate":148.00,"economy":9.20,"wickets_per_match":0.9,"role":"All-Rounder",        "team":"MI","data_source":"real_ipl"},
-    "Jasprit Bumrah":     {"batting_avg":8.00, "strike_rate":95.00, "economy":6.67,"wickets_per_match":1.5,"role":"Bowler",             "team":"MI","data_source":"real_ipl"},
-    "Trent Boult":        {"batting_avg":5.00, "strike_rate":75.00, "economy":8.30,"wickets_per_match":1.3,"role":"Bowler",             "team":"MI","data_source":"real_ipl"},
-    "Deepak Chahar":      {"batting_avg":10.00,"strike_rate":95.00, "economy":8.20,"wickets_per_match":1.1,"role":"Bowler",             "team":"MI","data_source":"real_ipl"},
-    "Naman Dhir":         {"batting_avg":25.20,"strike_rate":182.60,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"MI","data_source":"real_ipl"},
-    "Shardul Thakur":     {"batting_avg":19.00,"strike_rate":152.00,"economy":9.60,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"MI","data_source":"real_ipl"},
-    "Will Jacks":         {"batting_avg":26.00,"strike_rate":172.00,"economy":8.40,"wickets_per_match":0.6,"role":"All-Rounder",        "team":"MI","data_source":"real_ipl"},
-    "Mitchell Santner":   {"batting_avg":18.00,"strike_rate":138.00,"economy":7.80,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"MI","data_source":"real_ipl"},
-    "Robin Minz":         {"batting_avg":22.00,"strike_rate":155.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"MI","data_source":"estimated_domestic"},
-    "Sherfane Rutherford":{"batting_avg":25.00,"strike_rate":175.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"MI","data_source":"real_ipl"},
-    "Corbin Bosch":       {"batting_avg":20.00,"strike_rate":158.00,"economy":9.40,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"MI","data_source":"estimated_domestic"},
-    "Quinton de Kock":    {"batting_avg":30.50,"strike_rate":145.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"MI","data_source":"real_ipl"},
-    "Allah Ghazanfar":    {"batting_avg":5.00, "strike_rate":65.00, "economy":8.50,"wickets_per_match":1.2,"role":"Bowler",             "team":"MI","data_source":"estimated_domestic"},
-    "Ashwani Kumar":      {"batting_avg":5.00, "strike_rate":65.00, "economy":9.30,"wickets_per_match":0.9,"role":"Bowler",             "team":"MI","data_source":"role_based_fallback"},
-    "Raj Angad Bawa":     {"batting_avg":18.00,"strike_rate":148.00,"economy":9.00,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"MI","data_source":"estimated_domestic"},
-    "Raghu Sharma":       {"batting_avg":5.00, "strike_rate":65.00, "economy":8.80,"wickets_per_match":1.0,"role":"Bowler",             "team":"MI","data_source":"role_based_fallback"},
+    # ══ MUMBAI INDIANS (MI) ══════════════════════════════════════════════════
+    "Rohit Sharma":        {"batting_avg":30.20,"strike_rate":139.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"MI","data_source":"real_ipl"},
+    "Suryakumar Yadav":    {"batting_avg":65.18,"strike_rate":167.92,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"MI","data_source":"real_ipl"},
+    "Tilak Varma":         {"batting_avg":34.50,"strike_rate":158.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"MI","data_source":"real_ipl"},
+    "Ryan Rickelton":      {"batting_avg":40.72,"strike_rate":186.66,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"MI","data_source":"real_ipl"},
+    "Hardik Pandya":       {"batting_avg":28.00,"strike_rate":148.00,"economy":9.20,"wickets_per_match":0.9,"role":"All-Rounder",        "team":"MI","data_source":"real_ipl"},
+    "Jasprit Bumrah":      {"batting_avg":8.00, "strike_rate":95.00, "economy":6.67,"wickets_per_match":1.5,"role":"Bowler",             "team":"MI","data_source":"real_ipl"},
+    "Trent Boult":         {"batting_avg":5.00, "strike_rate":75.00, "economy":8.30,"wickets_per_match":1.3,"role":"Bowler",             "team":"MI","data_source":"real_ipl"},
+    "Deepak Chahar":       {"batting_avg":10.00,"strike_rate":95.00, "economy":8.20,"wickets_per_match":1.1,"role":"Bowler",             "team":"MI","data_source":"real_ipl"},
+    "Naman Dhir":          {"batting_avg":25.20,"strike_rate":182.60,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"MI","data_source":"real_ipl"},
+    "Shardul Thakur":      {"batting_avg":19.00,"strike_rate":152.00,"economy":9.60,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"MI","data_source":"real_ipl"},
+    "Will Jacks":          {"batting_avg":26.00,"strike_rate":172.00,"economy":8.40,"wickets_per_match":0.6,"role":"All-Rounder",        "team":"MI","data_source":"real_ipl"},
+    "Mitchell Santner":    {"batting_avg":18.00,"strike_rate":138.00,"economy":7.80,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"MI","data_source":"real_ipl"},
+    "Robin Minz":          {"batting_avg":22.00,"strike_rate":155.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"MI","data_source":"estimated_domestic"},
+    "Sherfane Rutherford": {"batting_avg":25.00,"strike_rate":175.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"MI","data_source":"real_ipl"},
+    "Corbin Bosch":        {"batting_avg":20.00,"strike_rate":158.00,"economy":9.40,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"MI","data_source":"estimated_domestic"},
+    "Quinton de Kock":     {"batting_avg":30.50,"strike_rate":145.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"MI","data_source":"real_ipl"},
+    "Allah Ghazanfar":     {"batting_avg":5.00, "strike_rate":65.00, "economy":8.50,"wickets_per_match":1.2,"role":"Bowler",             "team":"MI","data_source":"estimated_domestic"},
+    "Ashwani Kumar":       {"batting_avg":5.00, "strike_rate":65.00, "economy":9.30,"wickets_per_match":0.9,"role":"Bowler",             "team":"MI","data_source":"role_based_fallback"},
+    "Raj Angad Bawa":      {"batting_avg":18.00,"strike_rate":148.00,"economy":9.00,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"MI","data_source":"estimated_domestic"},
+    "Raghu Sharma":        {"batting_avg":5.00, "strike_rate":65.00, "economy":8.80,"wickets_per_match":1.0,"role":"Bowler",             "team":"MI","data_source":"role_based_fallback"},
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # KOLKATA KNIGHT RIDERS (KKR)
-    # ══════════════════════════════════════════════════════════════════════════
-    "Sunil Narine":       {"batting_avg":27.00,"strike_rate":168.00,"economy":7.60,"wickets_per_match":1.2,"role":"All-Rounder",        "team":"KKR","data_source":"real_ipl"},
-    "Rinku Singh":        {"batting_avg":59.00,"strike_rate":149.50,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
+    # ══ KOLKATA KNIGHT RIDERS (KKR) ══════════════════════════════════════════
+    "Sunil Narine":        {"batting_avg":27.00,"strike_rate":168.00,"economy":7.60,"wickets_per_match":1.2,"role":"All-Rounder",        "team":"KKR","data_source":"real_ipl"},
+    "Rinku Singh":         {"batting_avg":59.00,"strike_rate":149.50,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
     "Angkrish Raghuvanshi":{"batting_avg":28.13,"strike_rate":162.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",           "team":"KKR","data_source":"real_ipl"},
-    "Varun Chakravarthy": {"batting_avg":5.00, "strike_rate":70.00, "economy":7.80,"wickets_per_match":1.2,"role":"Bowler",             "team":"KKR","data_source":"real_ipl"},
-    "Harshit Rana":       {"batting_avg":8.00, "strike_rate":90.00, "economy":9.20,"wickets_per_match":1.1,"role":"Bowler",             "team":"KKR","data_source":"real_ipl"},
-    "Vaibhav Arora":      {"batting_avg":5.00, "strike_rate":70.00, "economy":9.20,"wickets_per_match":1.1,"role":"Bowler",             "team":"KKR","data_source":"real_ipl"},
-    "Ajinkya Rahane":     {"batting_avg":26.00,"strike_rate":130.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
-    "Rovman Powell":      {"batting_avg":24.00,"strike_rate":185.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
-    "Ramandeep Singh":    {"batting_avg":22.00,"strike_rate":176.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
-    "Manish Pandey":      {"batting_avg":28.00,"strike_rate":130.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
-    "Umran Malik":        {"batting_avg":4.00, "strike_rate":60.00, "economy":9.80,"wickets_per_match":1.0,"role":"Bowler",             "team":"KKR","data_source":"real_ipl"},
-    "Cameron Green":      {"batting_avg":32.00,"strike_rate":175.00,"economy":9.00,"wickets_per_match":0.6,"role":"All-Rounder",        "team":"KKR","data_source":"real_ipl"},
-    "Matheesha Pathirana":{"batting_avg":5.00, "strike_rate":68.00, "economy":8.50,"wickets_per_match":1.4,"role":"Bowler",             "team":"KKR","data_source":"real_ipl"},
-    "Mustafizur Rahman":  {"batting_avg":5.00, "strike_rate":68.00, "economy":8.20,"wickets_per_match":1.3,"role":"Bowler",             "team":"KKR","data_source":"real_ipl"},
-    "Finn Allen":         {"batting_avg":31.73,"strike_rate":214.11,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
-    "Rachin Ravindra":    {"batting_avg":30.00,"strike_rate":152.00,"economy":8.30,"wickets_per_match":0.6,"role":"All-Rounder",        "team":"KKR","data_source":"real_ipl"},
-    "Ankul Roy":          {"batting_avg":12.00,"strike_rate":128.00,"economy":8.40,"wickets_per_match":0.8,"role":"All-Rounder",        "team":"KKR","data_source":"estimated_domestic"},
-    "Tejasvi Singh":      {"batting_avg":20.00,"strike_rate":155.00,"economy":9.00,"wickets_per_match":0.4,"role":"All-Rounder",        "team":"KKR","data_source":"estimated_domestic"},
-    "Rahul Tripathi":     {"batting_avg":24.00,"strike_rate":145.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
-    "Akashdeep":          {"batting_avg":5.00, "strike_rate":65.00, "economy":9.40,"wickets_per_match":1.0,"role":"Bowler",             "team":"KKR","data_source":"estimated_domestic"},
+    "Varun Chakravarthy":  {"batting_avg":5.00, "strike_rate":70.00, "economy":7.80,"wickets_per_match":1.2,"role":"Bowler",             "team":"KKR","data_source":"real_ipl"},
+    "Harshit Rana":        {"batting_avg":8.00, "strike_rate":90.00, "economy":9.20,"wickets_per_match":1.1,"role":"Bowler",             "team":"KKR","data_source":"real_ipl"},
+    "Vaibhav Arora":       {"batting_avg":5.00, "strike_rate":70.00, "economy":9.20,"wickets_per_match":1.1,"role":"Bowler",             "team":"KKR","data_source":"real_ipl"},
+    "Ajinkya Rahane":      {"batting_avg":26.00,"strike_rate":130.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
+    "Rovman Powell":       {"batting_avg":24.00,"strike_rate":185.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
+    "Ramandeep Singh":     {"batting_avg":22.00,"strike_rate":176.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
+    "Umran Malik":         {"batting_avg":4.00, "strike_rate":60.00, "economy":9.80,"wickets_per_match":1.0,"role":"Bowler",             "team":"KKR","data_source":"real_ipl"},
+    "Cameron Green":       {"batting_avg":32.00,"strike_rate":175.00,"economy":9.00,"wickets_per_match":0.6,"role":"All-Rounder",        "team":"KKR","data_source":"real_ipl"},
+    "Matheesha Pathirana": {"batting_avg":5.00, "strike_rate":68.00, "economy":8.50,"wickets_per_match":1.4,"role":"Bowler",             "team":"KKR","data_source":"real_ipl"},
+    "Mustafizur Rahman":   {"batting_avg":5.00, "strike_rate":68.00, "economy":8.20,"wickets_per_match":1.3,"role":"Bowler",             "team":"KKR","data_source":"real_ipl"},
+    "Finn Allen":          {"batting_avg":31.73,"strike_rate":214.11,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
+    "Rachin Ravindra":     {"batting_avg":30.00,"strike_rate":152.00,"economy":8.30,"wickets_per_match":0.6,"role":"All-Rounder",        "team":"KKR","data_source":"real_ipl"},
+    "Ankul Roy":           {"batting_avg":12.00,"strike_rate":128.00,"economy":8.40,"wickets_per_match":0.8,"role":"All-Rounder",        "team":"KKR","data_source":"estimated_domestic"},
+    "Rahul Tripathi":      {"batting_avg":24.00,"strike_rate":145.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"KKR","data_source":"real_ipl"},
+    "Akashdeep":           {"batting_avg":5.00, "strike_rate":65.00, "economy":9.40,"wickets_per_match":1.0,"role":"Bowler",             "team":"KKR","data_source":"estimated_domestic"},
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # ROYAL CHALLENGERS BENGALURU (RCB)
-    # ══════════════════════════════════════════════════════════════════════════
-    "Rajat Patidar":      {"batting_avg":35.00,"strike_rate":192.69,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"RCB","data_source":"real_ipl"},
-    "Virat Kohli":        {"batting_avg":55.42,"strike_rate":148.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"RCB","data_source":"real_ipl"},
-    "Devdutt Padikkal":   {"batting_avg":32.86,"strike_rate":148.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"RCB","data_source":"real_ipl"},
-    "Tim David":          {"batting_avg":62.33,"strike_rate":188.27,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"RCB","data_source":"real_ipl"},
-    "Jitesh Sharma":      {"batting_avg":29.00,"strike_rate":176.35,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"RCB","data_source":"real_ipl"},
-    "Krunal Pandya":      {"batting_avg":23.00,"strike_rate":140.00,"economy":8.20,"wickets_per_match":1.1,"role":"All-Rounder",        "team":"RCB","data_source":"real_ipl"},
-    "Josh Hazlewood":     {"batting_avg":5.00, "strike_rate":68.00, "economy":8.10,"wickets_per_match":1.4,"role":"Bowler",             "team":"RCB","data_source":"real_ipl"},
-    "Bhuvneshwar Kumar":  {"batting_avg":8.00, "strike_rate":88.00, "economy":7.90,"wickets_per_match":1.1,"role":"Bowler",             "team":"RCB","data_source":"real_ipl"},
-    "Yash Dayal":         {"batting_avg":5.00, "strike_rate":65.00, "economy":9.40,"wickets_per_match":1.0,"role":"Bowler",             "team":"RCB","data_source":"real_ipl"},
-    "Phil Salt":          {"batting_avg":28.00,"strike_rate":165.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"RCB","data_source":"real_ipl"},
-    "Venkatesh Iyer":     {"batting_avg":34.83,"strike_rate":186.60,"economy":9.50,"wickets_per_match":0.3,"role":"All-Rounder",        "team":"RCB","data_source":"real_ipl"},
-    "Romario Shepherd":   {"batting_avg":22.00,"strike_rate":172.00,"economy":9.20,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"RCB","data_source":"real_ipl"},
-    "Jacob Bethell":      {"batting_avg":24.00,"strike_rate":162.00,"economy":8.60,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"RCB","data_source":"estimated_domestic"},
-    "Nuwan Thushara":     {"batting_avg":5.00, "strike_rate":65.00, "economy":8.70,"wickets_per_match":1.2,"role":"Bowler",             "team":"RCB","data_source":"estimated_domestic"},
-    "Swapnil Singh":      {"batting_avg":14.00,"strike_rate":130.00,"economy":8.30,"wickets_per_match":0.9,"role":"All-Rounder",        "team":"RCB","data_source":"estimated_domestic"},
-    "Rasikh Salam":       {"batting_avg":5.00, "strike_rate":65.00, "economy":9.10,"wickets_per_match":1.0,"role":"Bowler",             "team":"RCB","data_source":"estimated_domestic"},
-    "Mangesh Yadav":      {"batting_avg":5.00, "strike_rate":65.00, "economy":9.00,"wickets_per_match":1.1,"role":"Bowler",             "team":"RCB","data_source":"estimated_domestic"},
-    "Suyash Sharma":      {"batting_avg":5.00, "strike_rate":65.00, "economy":8.60,"wickets_per_match":1.0,"role":"Bowler",             "team":"RCB","data_source":"estimated_domestic"},
+    # ══ ROYAL CHALLENGERS BENGALURU (RCB) ════════════════════════════════════
+    "Rajat Patidar":       {"batting_avg":35.00,"strike_rate":192.69,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"RCB","data_source":"real_ipl"},
+    "Virat Kohli":         {"batting_avg":55.42,"strike_rate":148.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"RCB","data_source":"real_ipl"},
+    "Devdutt Padikkal":    {"batting_avg":32.86,"strike_rate":148.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"RCB","data_source":"real_ipl"},
+    "Tim David":           {"batting_avg":62.33,"strike_rate":188.27,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"RCB","data_source":"real_ipl"},
+    "Jitesh Sharma":       {"batting_avg":29.00,"strike_rate":176.35,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"RCB","data_source":"real_ipl"},
+    "Krunal Pandya":       {"batting_avg":23.00,"strike_rate":140.00,"economy":8.20,"wickets_per_match":1.1,"role":"All-Rounder",        "team":"RCB","data_source":"real_ipl"},
+    "Josh Hazlewood":      {"batting_avg":5.00, "strike_rate":68.00, "economy":8.10,"wickets_per_match":1.4,"role":"Bowler",             "team":"RCB","data_source":"real_ipl"},
+    "Bhuvneshwar Kumar":   {"batting_avg":8.00, "strike_rate":88.00, "economy":7.90,"wickets_per_match":1.1,"role":"Bowler",             "team":"RCB","data_source":"real_ipl"},
+    "Yash Dayal":          {"batting_avg":5.00, "strike_rate":65.00, "economy":9.40,"wickets_per_match":1.0,"role":"Bowler",             "team":"RCB","data_source":"real_ipl"},
+    "Phil Salt":           {"batting_avg":28.00,"strike_rate":165.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"RCB","data_source":"real_ipl"},
+    "Venkatesh Iyer":      {"batting_avg":34.83,"strike_rate":186.60,"economy":9.50,"wickets_per_match":0.3,"role":"All-Rounder",        "team":"RCB","data_source":"real_ipl"},
+    "Romario Shepherd":    {"batting_avg":22.00,"strike_rate":172.00,"economy":9.20,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"RCB","data_source":"real_ipl"},
+    "Jacob Bethell":       {"batting_avg":24.00,"strike_rate":162.00,"economy":8.60,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"RCB","data_source":"estimated_domestic"},
+    "Nuwan Thushara":      {"batting_avg":5.00, "strike_rate":65.00, "economy":8.70,"wickets_per_match":1.2,"role":"Bowler",             "team":"RCB","data_source":"estimated_domestic"},
+    "Swapnil Singh":       {"batting_avg":14.00,"strike_rate":130.00,"economy":8.30,"wickets_per_match":0.9,"role":"All-Rounder",        "team":"RCB","data_source":"estimated_domestic"},
+    "Rasikh Salam":        {"batting_avg":5.00, "strike_rate":65.00, "economy":9.10,"wickets_per_match":1.0,"role":"Bowler",             "team":"RCB","data_source":"estimated_domestic"},
+    "Suyash Sharma":       {"batting_avg":5.00, "strike_rate":65.00, "economy":8.60,"wickets_per_match":1.0,"role":"Bowler",             "team":"RCB","data_source":"estimated_domestic"},
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # PUNJAB KINGS (PBKS)
-    # ══════════════════════════════════════════════════════════════════════════
-    "Shreyas Iyer":       {"batting_avg":50.33,"strike_rate":175.07,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"real_ipl"},
-    "Prabhsimran Singh":  {"batting_avg":32.29,"strike_rate":160.53,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"real_ipl"},
-    "Priyansh Arya":      {"batting_avg":27.94,"strike_rate":211.62,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"real_ipl"},
-    "Shashank Singh":     {"batting_avg":26.14,"strike_rate":188.57,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"real_ipl"},
-    "Yuzvendra Chahal":   {"batting_avg":5.00, "strike_rate":75.00, "economy":7.91,"wickets_per_match":1.4,"role":"Bowler",             "team":"PBKS","data_source":"real_ipl"},
-    "Arshdeep Singh":     {"batting_avg":6.00, "strike_rate":80.00, "economy":8.88,"wickets_per_match":1.3,"role":"Bowler",             "team":"PBKS","data_source":"real_ipl"},
-    "Marcus Stoinis":     {"batting_avg":22.86,"strike_rate":186.04,"economy":9.50,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"PBKS","data_source":"real_ipl"},
-    "Nehal Wadhera":      {"batting_avg":24.00,"strike_rate":162.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"real_ipl"},
-    "Harpreet Brar":      {"batting_avg":12.00,"strike_rate":130.00,"economy":8.50,"wickets_per_match":0.9,"role":"All-Rounder",        "team":"PBKS","data_source":"real_ipl"},
-    "Marco Jansen":       {"batting_avg":18.00,"strike_rate":148.00,"economy":8.80,"wickets_per_match":1.1,"role":"All-Rounder",        "team":"PBKS","data_source":"real_ipl"},
-    "Lockie Ferguson":    {"batting_avg":5.00, "strike_rate":68.00, "economy":9.00,"wickets_per_match":1.3,"role":"Bowler",             "team":"PBKS","data_source":"real_ipl"},
-    "Azmatullah Omarzai": {"batting_avg":22.00,"strike_rate":158.00,"economy":9.10,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"PBKS","data_source":"real_ipl"},
-    "Musheer Khan":       {"batting_avg":20.00,"strike_rate":145.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"estimated_domestic"},
-    "Mitchell Owen":      {"batting_avg":26.00,"strike_rate":185.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"estimated_domestic"},
-    "Xavier Bartlett":    {"batting_avg":5.00, "strike_rate":65.00, "economy":9.10,"wickets_per_match":1.1,"role":"Bowler",             "team":"PBKS","data_source":"estimated_domestic"},
-    "Cooper Connolly":    {"batting_avg":28.00,"strike_rate":162.00,"economy":8.80,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"PBKS","data_source":"real_ipl"},
-    "Ben Dwarshuis":      {"batting_avg":8.00, "strike_rate":80.00, "economy":8.90,"wickets_per_match":1.1,"role":"Bowler",             "team":"PBKS","data_source":"estimated_domestic"},
-    "Vyshak Vijaykumar":  {"batting_avg":6.00, "strike_rate":70.00, "economy":9.30,"wickets_per_match":1.0,"role":"Bowler",             "team":"PBKS","data_source":"estimated_domestic"},
-    "Vishnu Vinod":       {"batting_avg":22.00,"strike_rate":148.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"PBKS","data_source":"estimated_domestic"},
+    # ══ PUNJAB KINGS (PBKS) ══════════════════════════════════════════════════
+    "Shreyas Iyer":        {"batting_avg":50.33,"strike_rate":175.07,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"real_ipl"},
+    "Prabhsimran Singh":   {"batting_avg":32.29,"strike_rate":160.53,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"real_ipl"},
+    "Priyansh Arya":       {"batting_avg":27.94,"strike_rate":211.62,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"real_ipl"},
+    "Shashank Singh":      {"batting_avg":26.14,"strike_rate":188.57,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"real_ipl"},
+    "Yuzvendra Chahal":    {"batting_avg":5.00, "strike_rate":75.00, "economy":7.91,"wickets_per_match":1.4,"role":"Bowler",             "team":"PBKS","data_source":"real_ipl"},
+    "Arshdeep Singh":      {"batting_avg":6.00, "strike_rate":80.00, "economy":8.88,"wickets_per_match":1.3,"role":"Bowler",             "team":"PBKS","data_source":"real_ipl"},
+    "Marcus Stoinis":      {"batting_avg":22.86,"strike_rate":186.04,"economy":9.50,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"PBKS","data_source":"real_ipl"},
+    "Nehal Wadhera":       {"batting_avg":24.00,"strike_rate":162.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"real_ipl"},
+    "Harpreet Brar":       {"batting_avg":12.00,"strike_rate":130.00,"economy":8.50,"wickets_per_match":0.9,"role":"All-Rounder",        "team":"PBKS","data_source":"real_ipl"},
+    "Marco Jansen":        {"batting_avg":18.00,"strike_rate":148.00,"economy":8.80,"wickets_per_match":1.1,"role":"All-Rounder",        "team":"PBKS","data_source":"real_ipl"},
+    "Lockie Ferguson":     {"batting_avg":5.00, "strike_rate":68.00, "economy":9.00,"wickets_per_match":1.3,"role":"Bowler",             "team":"PBKS","data_source":"real_ipl"},
+    "Azmatullah Omarzai":  {"batting_avg":22.00,"strike_rate":158.00,"economy":9.10,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"PBKS","data_source":"real_ipl"},
+    "Musheer Khan":        {"batting_avg":20.00,"strike_rate":145.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"estimated_domestic"},
+    "Mitchell Owen":       {"batting_avg":26.00,"strike_rate":185.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"PBKS","data_source":"estimated_domestic"},
+    "Xavier Bartlett":     {"batting_avg":5.00, "strike_rate":65.00, "economy":9.10,"wickets_per_match":1.1,"role":"Bowler",             "team":"PBKS","data_source":"estimated_domestic"},
+    "Cooper Connolly":     {"batting_avg":28.00,"strike_rate":162.00,"economy":8.80,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"PBKS","data_source":"real_ipl"},
+    "Vyshak Vijaykumar":   {"batting_avg":6.00, "strike_rate":70.00, "economy":9.30,"wickets_per_match":1.0,"role":"Bowler",             "team":"PBKS","data_source":"estimated_domestic"},
+    "Vishnu Vinod":        {"batting_avg":22.00,"strike_rate":148.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"PBKS","data_source":"estimated_domestic"},
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # GUJARAT TITANS (GT)
-    # ══════════════════════════════════════════════════════════════════════════
-    "Shubman Gill":       {"batting_avg":44.14,"strike_rate":159.27,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"GT","data_source":"real_ipl"},
-    "Sai Sudharsan":      {"batting_avg":46.57,"strike_rate":157.86,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"GT","data_source":"real_ipl"},
-    "Jos Buttler":        {"batting_avg":39.92,"strike_rate":163.03,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"GT","data_source":"real_ipl"},
-    "Rashid Khan":        {"batting_avg":18.00,"strike_rate":140.00,"economy":7.09,"wickets_per_match":1.5,"role":"Bowler",             "team":"GT","data_source":"real_ipl"},
-    "Washington Sundar":  {"batting_avg":22.00,"strike_rate":140.00,"economy":7.90,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"GT","data_source":"real_ipl"},
-    "Kagiso Rabada":      {"batting_avg":10.00,"strike_rate":100.00,"economy":8.40,"wickets_per_match":1.4,"role":"Bowler",             "team":"GT","data_source":"real_ipl"},
-    "Mohammed Siraj":     {"batting_avg":6.00, "strike_rate":72.00, "economy":9.10,"wickets_per_match":1.2,"role":"Bowler",             "team":"GT","data_source":"real_ipl"},
-    "Prasidh Krishna":    {"batting_avg":5.00, "strike_rate":72.00, "economy":9.10,"wickets_per_match":1.6,"role":"Bowler",             "team":"GT","data_source":"real_ipl"},
-    "Sai Kishore":        {"batting_avg":6.00, "strike_rate":78.00, "economy":7.50,"wickets_per_match":1.2,"role":"Bowler",             "team":"GT","data_source":"real_ipl"},
-    "Shahrukh Khan":      {"batting_avg":22.38,"strike_rate":179.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"GT","data_source":"real_ipl"},
-    "Rahul Tewatia":      {"batting_avg":26.00,"strike_rate":155.00,"economy":8.80,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"GT","data_source":"real_ipl"},
-    "Nishant Sindhu":     {"batting_avg":16.00,"strike_rate":148.00,"economy":8.60,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"GT","data_source":"estimated_domestic"},
-    "Ishant Sharma":      {"batting_avg":5.00, "strike_rate":65.00, "economy":9.00,"wickets_per_match":0.9,"role":"Bowler",             "team":"GT","data_source":"real_ipl"},
-    "Gurnoor Singh Brar": {"batting_avg":6.00, "strike_rate":68.00, "economy":9.20,"wickets_per_match":1.0,"role":"Bowler",             "team":"GT","data_source":"estimated_domestic"},
-    "Manav Suthar":       {"batting_avg":8.00, "strike_rate":80.00, "economy":8.20,"wickets_per_match":1.0,"role":"Bowler",             "team":"GT","data_source":"estimated_domestic"},
-    "Jayant Yadav":       {"batting_avg":14.00,"strike_rate":130.00,"economy":8.30,"wickets_per_match":0.9,"role":"All-Rounder",        "team":"GT","data_source":"real_ipl"},
-    "Glenn Phillips":     {"batting_avg":28.00,"strike_rate":168.00,"economy":8.50,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"GT","data_source":"real_ipl"},
-    "Kumar Kushagra":     {"batting_avg":20.00,"strike_rate":152.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"GT","data_source":"estimated_domestic"},
-    "Anuj Rawat":         {"batting_avg":18.00,"strike_rate":145.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"GT","data_source":"estimated_domestic"},
-    "Arshad Khan":        {"batting_avg":8.00, "strike_rate":80.00, "economy":8.70,"wickets_per_match":0.9,"role":"Bowler",             "team":"GT","data_source":"estimated_domestic"},
-    "Jason Holder":       {"batting_avg":18.00,"strike_rate":145.00,"economy":8.90,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"GT","data_source":"real_ipl"},
+    # ══ GUJARAT TITANS (GT) ══════════════════════════════════════════════════
+    "Shubman Gill":        {"batting_avg":44.14,"strike_rate":159.27,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"GT","data_source":"real_ipl"},
+    "Sai Sudharsan":       {"batting_avg":46.57,"strike_rate":157.86,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"GT","data_source":"real_ipl"},
+    "Jos Buttler":         {"batting_avg":39.92,"strike_rate":163.03,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"GT","data_source":"real_ipl"},
+    "Rashid Khan":         {"batting_avg":18.00,"strike_rate":140.00,"economy":7.09,"wickets_per_match":1.5,"role":"Bowler",             "team":"GT","data_source":"real_ipl"},
+    "Washington Sundar":   {"batting_avg":22.00,"strike_rate":140.00,"economy":7.90,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"GT","data_source":"real_ipl"},
+    "Kagiso Rabada":       {"batting_avg":10.00,"strike_rate":100.00,"economy":8.40,"wickets_per_match":1.4,"role":"Bowler",             "team":"GT","data_source":"real_ipl"},
+    "Mohammed Siraj":      {"batting_avg":6.00, "strike_rate":72.00, "economy":9.10,"wickets_per_match":1.2,"role":"Bowler",             "team":"GT","data_source":"real_ipl"},
+    "Prasidh Krishna":     {"batting_avg":5.00, "strike_rate":72.00, "economy":9.10,"wickets_per_match":1.6,"role":"Bowler",             "team":"GT","data_source":"real_ipl"},
+    "Sai Kishore":         {"batting_avg":6.00, "strike_rate":78.00, "economy":7.50,"wickets_per_match":1.2,"role":"Bowler",             "team":"GT","data_source":"real_ipl"},
+    "Shahrukh Khan":       {"batting_avg":22.38,"strike_rate":179.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"GT","data_source":"real_ipl"},
+    "Rahul Tewatia":       {"batting_avg":26.00,"strike_rate":155.00,"economy":8.80,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"GT","data_source":"real_ipl"},
+    "Nishant Sindhu":      {"batting_avg":16.00,"strike_rate":148.00,"economy":8.60,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"GT","data_source":"estimated_domestic"},
+    "Ishant Sharma":       {"batting_avg":5.00, "strike_rate":65.00, "economy":9.00,"wickets_per_match":0.9,"role":"Bowler",             "team":"GT","data_source":"real_ipl"},
+    "Gurnoor Singh Brar":  {"batting_avg":6.00, "strike_rate":68.00, "economy":9.20,"wickets_per_match":1.0,"role":"Bowler",             "team":"GT","data_source":"estimated_domestic"},
+    "Manav Suthar":        {"batting_avg":8.00, "strike_rate":80.00, "economy":8.20,"wickets_per_match":1.0,"role":"Bowler",             "team":"GT","data_source":"estimated_domestic"},
+    "Jayant Yadav":        {"batting_avg":14.00,"strike_rate":130.00,"economy":8.30,"wickets_per_match":0.9,"role":"All-Rounder",        "team":"GT","data_source":"real_ipl"},
+    "Glenn Phillips":      {"batting_avg":28.00,"strike_rate":168.00,"economy":8.50,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"GT","data_source":"real_ipl"},
+    "Kumar Kushagra":      {"batting_avg":20.00,"strike_rate":152.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"GT","data_source":"estimated_domestic"},
+    "Anuj Rawat":          {"batting_avg":18.00,"strike_rate":145.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"GT","data_source":"estimated_domestic"},
+    "Jason Holder":        {"batting_avg":18.00,"strike_rate":145.00,"economy":8.90,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"GT","data_source":"real_ipl"},
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # RAJASTHAN ROYALS (RR)
-    # ══════════════════════════════════════════════════════════════════════════
-    "Vaibhav Sooryavanshi":{"batting_avg":45.33,"strike_rate":237.30,"economy":9.80,"wickets_per_match":0.0,"role":"Batsman",           "team":"RR","data_source":"real_ipl"},
-    "Yashasvi Jaiswal":   {"batting_avg":43.00,"strike_rate":159.71,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"RR","data_source":"real_ipl"},
-    "Dhruv Jurel":        {"batting_avg":36.07,"strike_rate":155.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"RR","data_source":"real_ipl"},
-    "Ravindra Jadeja":    {"batting_avg":66.50,"strike_rate":152.00,"economy":7.80,"wickets_per_match":1.2,"role":"All-Rounder",        "team":"RR","data_source":"real_ipl"},
-    "Riyan Parag":        {"batting_avg":30.00,"strike_rate":158.00,"economy":8.60,"wickets_per_match":0.4,"role":"All-Rounder",        "team":"RR","data_source":"real_ipl"},
-    "Jofra Archer":       {"batting_avg":10.00,"strike_rate":100.00,"economy":7.90,"wickets_per_match":1.4,"role":"Bowler",             "team":"RR","data_source":"real_ipl"},
-    "Sam Curran":         {"batting_avg":22.00,"strike_rate":155.00,"economy":8.60,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"RR","data_source":"real_ipl"},
-    "Ravi Bishnoi":       {"batting_avg":6.00, "strike_rate":72.00, "economy":8.00,"wickets_per_match":1.3,"role":"Bowler",             "team":"RR","data_source":"real_ipl"},
-    "Shimron Hetmyer":    {"batting_avg":34.00,"strike_rate":192.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"RR","data_source":"real_ipl"},
-    "Shubham Dubey":      {"batting_avg":22.00,"strike_rate":155.00,"economy":8.80,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"RR","data_source":"estimated_domestic"},
-    "Yudhvir Singh Charak":{"batting_avg":8.00,"strike_rate":85.00, "economy":9.10,"wickets_per_match":1.1,"role":"Bowler",             "team":"RR","data_source":"estimated_domestic"},
-    "Tushar Deshpande":   {"batting_avg":6.00, "strike_rate":68.00, "economy":9.40,"wickets_per_match":1.1,"role":"Bowler",             "team":"RR","data_source":"real_ipl"},
-    "Kwena Maphaka":      {"batting_avg":5.00, "strike_rate":65.00, "economy":9.20,"wickets_per_match":1.1,"role":"Bowler",             "team":"RR","data_source":"estimated_domestic"},
-    "Nandre Burger":      {"batting_avg":5.00, "strike_rate":65.00, "economy":9.00,"wickets_per_match":1.1,"role":"Bowler",             "team":"RR","data_source":"estimated_domestic"},
-    "Lhuan-Dre Pretorius":{"batting_avg":18.00,"strike_rate":158.00,"economy":9.30,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"RR","data_source":"estimated_domestic"},
-    "Adam Milne":         {"batting_avg":5.00, "strike_rate":65.00, "economy":9.10,"wickets_per_match":1.1,"role":"Bowler",             "team":"RR","data_source":"estimated_domestic"},
+    # ══ RAJASTHAN ROYALS (RR) ════════════════════════════════════════════════
+    "Vaibhav Sooryavanshi":{"batting_avg":45.33,"strike_rate":237.30,"economy":9.80,"wickets_per_match":0.0,"role":"Batsman",            "team":"RR","data_source":"real_ipl"},
+    "Yashasvi Jaiswal":    {"batting_avg":43.00,"strike_rate":159.71,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"RR","data_source":"real_ipl"},
+    "Dhruv Jurel":         {"batting_avg":36.07,"strike_rate":155.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"RR","data_source":"real_ipl"},
+    "Ravindra Jadeja":     {"batting_avg":66.50,"strike_rate":152.00,"economy":7.80,"wickets_per_match":1.2,"role":"All-Rounder",        "team":"RR","data_source":"real_ipl"},
+    "Riyan Parag":         {"batting_avg":30.00,"strike_rate":158.00,"economy":8.60,"wickets_per_match":0.4,"role":"All-Rounder",        "team":"RR","data_source":"real_ipl"},
+    "Jofra Archer":        {"batting_avg":10.00,"strike_rate":100.00,"economy":7.90,"wickets_per_match":1.4,"role":"Bowler",             "team":"RR","data_source":"real_ipl"},
+    "Sam Curran":          {"batting_avg":22.00,"strike_rate":155.00,"economy":8.60,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"RR","data_source":"real_ipl"},
+    "Ravi Bishnoi":        {"batting_avg":6.00, "strike_rate":72.00, "economy":8.00,"wickets_per_match":1.3,"role":"Bowler",             "team":"RR","data_source":"real_ipl"},
+    "Shimron Hetmyer":     {"batting_avg":34.00,"strike_rate":192.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"RR","data_source":"real_ipl"},
+    "Shubham Dubey":       {"batting_avg":22.00,"strike_rate":155.00,"economy":8.80,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"RR","data_source":"estimated_domestic"},
+    "Yudhvir Singh Charak":{"batting_avg":8.00, "strike_rate":85.00, "economy":9.10,"wickets_per_match":1.1,"role":"Bowler",             "team":"RR","data_source":"estimated_domestic"},
+    "Tushar Deshpande":    {"batting_avg":6.00, "strike_rate":68.00, "economy":9.40,"wickets_per_match":1.1,"role":"Bowler",             "team":"RR","data_source":"real_ipl"},
+    "Kwena Maphaka":       {"batting_avg":5.00, "strike_rate":65.00, "economy":9.20,"wickets_per_match":1.1,"role":"Bowler",             "team":"RR","data_source":"estimated_domestic"},
+    "Nandre Burger":       {"batting_avg":5.00, "strike_rate":65.00, "economy":9.00,"wickets_per_match":1.1,"role":"Bowler",             "team":"RR","data_source":"estimated_domestic"},
+    "Lhuan-Dre Pretorius": {"batting_avg":18.00,"strike_rate":158.00,"economy":9.30,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"RR","data_source":"estimated_domestic"},
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # SUNRISERS HYDERABAD (SRH)
-    # ══════════════════════════════════════════════════════════════════════════
-    "Pat Cummins":        {"batting_avg":18.00,"strike_rate":148.00,"economy":8.80,"wickets_per_match":1.2,"role":"All-Rounder",        "team":"SRH","data_source":"real_ipl"},
-    "Travis Head":        {"batting_avg":40.00,"strike_rate":185.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"SRH","data_source":"real_ipl"},
-    "Abhishek Sharma":    {"batting_avg":33.77,"strike_rate":193.39,"economy":8.50,"wickets_per_match":0.3,"role":"All-Rounder",        "team":"SRH","data_source":"real_ipl"},
-    "Heinrich Klaasen":   {"batting_avg":50.50,"strike_rate":159.47,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"SRH","data_source":"real_ipl"},
-    "Ishan Kishan":       {"batting_avg":40.13,"strike_rate":182.42,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"SRH","data_source":"real_ipl"},
-    "Nitish Kumar Reddy": {"batting_avg":26.00,"strike_rate":158.00,"economy":9.20,"wickets_per_match":0.6,"role":"All-Rounder",        "team":"SRH","data_source":"real_ipl"},
-    "Harshal Patel":      {"batting_avg":8.00, "strike_rate":88.00, "economy":8.70,"wickets_per_match":1.2,"role":"Bowler",             "team":"SRH","data_source":"real_ipl"},
-    "Brydon Carse":       {"batting_avg":14.00,"strike_rate":140.00,"economy":9.00,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"SRH","data_source":"estimated_domestic"},
-    "Liam Livingstone":   {"batting_avg":28.00,"strike_rate":175.00,"economy":8.60,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"SRH","data_source":"real_ipl"},
-    "Kamindu Mendis":     {"batting_avg":24.00,"strike_rate":148.00,"economy":8.20,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"SRH","data_source":"real_ipl"},
-    "Jaydev Unadkat":     {"batting_avg":8.00, "strike_rate":80.00, "economy":8.60,"wickets_per_match":1.0,"role":"Bowler",             "team":"SRH","data_source":"real_ipl"},
-    "Harsh Dubey":        {"batting_avg":6.00, "strike_rate":70.00, "economy":8.30,"wickets_per_match":1.1,"role":"Bowler",             "team":"SRH","data_source":"estimated_domestic"},
-    "Aniket Verma":       {"batting_avg":20.00,"strike_rate":158.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"SRH","data_source":"estimated_domestic"},
-    "R Smaran":           {"batting_avg":22.00,"strike_rate":150.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"SRH","data_source":"estimated_domestic"},
-    "Jack Edwards":       {"batting_avg":20.00,"strike_rate":155.00,"economy":9.00,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"SRH","data_source":"estimated_domestic"},
+    # ══ SUNRISERS HYDERABAD (SRH) ════════════════════════════════════════════
+    "Pat Cummins":         {"batting_avg":18.00,"strike_rate":148.00,"economy":8.80,"wickets_per_match":1.2,"role":"All-Rounder",        "team":"SRH","data_source":"real_ipl"},
+    "Travis Head":         {"batting_avg":40.00,"strike_rate":185.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"SRH","data_source":"real_ipl"},
+    "Abhishek Sharma":     {"batting_avg":33.77,"strike_rate":193.39,"economy":8.50,"wickets_per_match":0.3,"role":"All-Rounder",        "team":"SRH","data_source":"real_ipl"},
+    "Heinrich Klaasen":    {"batting_avg":50.50,"strike_rate":159.47,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"SRH","data_source":"real_ipl"},
+    "Ishan Kishan":        {"batting_avg":40.13,"strike_rate":182.42,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"SRH","data_source":"real_ipl"},
+    "Nitish Kumar Reddy":  {"batting_avg":26.00,"strike_rate":158.00,"economy":9.20,"wickets_per_match":0.6,"role":"All-Rounder",        "team":"SRH","data_source":"real_ipl"},
+    "Harshal Patel":       {"batting_avg":8.00, "strike_rate":88.00, "economy":8.70,"wickets_per_match":1.2,"role":"Bowler",             "team":"SRH","data_source":"real_ipl"},
+    "Brydon Carse":        {"batting_avg":14.00,"strike_rate":140.00,"economy":9.00,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"SRH","data_source":"estimated_domestic"},
+    "Liam Livingstone":    {"batting_avg":28.00,"strike_rate":175.00,"economy":8.60,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"SRH","data_source":"real_ipl"},
+    "Kamindu Mendis":      {"batting_avg":24.00,"strike_rate":148.00,"economy":8.20,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"SRH","data_source":"real_ipl"},
+    "Jaydev Unadkat":      {"batting_avg":8.00, "strike_rate":80.00, "economy":8.60,"wickets_per_match":1.0,"role":"Bowler",             "team":"SRH","data_source":"real_ipl"},
+    "Harsh Dubey":         {"batting_avg":6.00, "strike_rate":70.00, "economy":8.30,"wickets_per_match":1.1,"role":"Bowler",             "team":"SRH","data_source":"estimated_domestic"},
+    "Aniket Verma":        {"batting_avg":20.00,"strike_rate":158.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"SRH","data_source":"estimated_domestic"},
+    "R Smaran":            {"batting_avg":22.00,"strike_rate":150.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"SRH","data_source":"estimated_domestic"},
+    "Jack Edwards":        {"batting_avg":20.00,"strike_rate":155.00,"economy":9.00,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"SRH","data_source":"estimated_domestic"},
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # LUCKNOW SUPER GIANTS (LSG)
-    # ══════════════════════════════════════════════════════════════════════════
-    "Rishabh Pant":       {"batting_avg":35.00,"strike_rate":162.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"LSG","data_source":"real_ipl"},
-    "Nicholas Pooran":    {"batting_avg":43.67,"strike_rate":196.25,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"LSG","data_source":"real_ipl"},
-    "Mitchell Marsh":     {"batting_avg":48.23,"strike_rate":163.71,"economy":9.30,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"LSG","data_source":"real_ipl"},
-    "Mohammed Shami":     {"batting_avg":7.00, "strike_rate":90.00, "economy":8.50,"wickets_per_match":1.2,"role":"Bowler",             "team":"LSG","data_source":"real_ipl"},
-    "Aiden Markram":      {"batting_avg":32.00,"strike_rate":148.00,"economy":8.40,"wickets_per_match":0.4,"role":"All-Rounder",        "team":"LSG","data_source":"real_ipl"},
-    "Shahbaz Ahmed":      {"batting_avg":22.00,"strike_rate":148.00,"economy":8.30,"wickets_per_match":0.8,"role":"All-Rounder",        "team":"LSG","data_source":"real_ipl"},
-    "Mayank Yadav":       {"batting_avg":5.00, "strike_rate":65.00, "economy":8.30,"wickets_per_match":1.3,"role":"Bowler",             "team":"LSG","data_source":"real_ipl"},
-    "Avesh Khan":         {"batting_avg":6.00, "strike_rate":70.00, "economy":9.30,"wickets_per_match":1.1,"role":"Bowler",             "team":"LSG","data_source":"real_ipl"},
-    "Mohsin Khan":        {"batting_avg":5.00, "strike_rate":65.00, "economy":8.70,"wickets_per_match":1.1,"role":"Bowler",             "team":"LSG","data_source":"real_ipl"},
-    "Abdul Samad":        {"batting_avg":24.00,"strike_rate":170.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"LSG","data_source":"real_ipl"},
-    "Ayush Badoni":       {"batting_avg":26.00,"strike_rate":155.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"LSG","data_source":"real_ipl"},
-    "Matthew Breetzke":   {"batting_avg":28.00,"strike_rate":150.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"LSG","data_source":"estimated_domestic"},
-    "Himmat Singh":       {"batting_avg":20.00,"strike_rate":148.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"LSG","data_source":"estimated_domestic"},
-    "Josh Inglis":        {"batting_avg":30.00,"strike_rate":162.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"LSG","data_source":"real_ipl"},
-    "Anrich Nortje":      {"batting_avg":6.00, "strike_rate":68.00, "economy":8.60,"wickets_per_match":1.3,"role":"Bowler",             "team":"LSG","data_source":"real_ipl"},
-    "Wanindu Hasaranga":  {"batting_avg":18.00,"strike_rate":148.00,"economy":8.10,"wickets_per_match":1.2,"role":"All-Rounder",        "team":"LSG","data_source":"real_ipl"},
-    "Arshin Kulkarni":    {"batting_avg":16.00,"strike_rate":145.00,"economy":8.70,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"LSG","data_source":"estimated_domestic"},
-    "Digvesh Rathi":      {"batting_avg":6.00, "strike_rate":68.00, "economy":8.50,"wickets_per_match":1.0,"role":"Bowler",             "team":"LSG","data_source":"estimated_domestic"},
+    # ══ LUCKNOW SUPER GIANTS (LSG) ═══════════════════════════════════════════
+    "Rishabh Pant":        {"batting_avg":35.00,"strike_rate":162.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"LSG","data_source":"real_ipl"},
+    "Nicholas Pooran":     {"batting_avg":43.67,"strike_rate":196.25,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"LSG","data_source":"real_ipl"},
+    "Mitchell Marsh":      {"batting_avg":48.23,"strike_rate":163.71,"economy":9.30,"wickets_per_match":0.5,"role":"All-Rounder",        "team":"LSG","data_source":"real_ipl"},
+    "Mohammed Shami":      {"batting_avg":7.00, "strike_rate":90.00, "economy":8.50,"wickets_per_match":1.2,"role":"Bowler",             "team":"LSG","data_source":"real_ipl"},
+    "Aiden Markram":       {"batting_avg":32.00,"strike_rate":148.00,"economy":8.40,"wickets_per_match":0.4,"role":"All-Rounder",        "team":"LSG","data_source":"real_ipl"},
+    "Shahbaz Ahmed":       {"batting_avg":22.00,"strike_rate":148.00,"economy":8.30,"wickets_per_match":0.8,"role":"All-Rounder",        "team":"LSG","data_source":"real_ipl"},
+    "Mayank Yadav":        {"batting_avg":5.00, "strike_rate":65.00, "economy":8.30,"wickets_per_match":1.3,"role":"Bowler",             "team":"LSG","data_source":"real_ipl"},
+    "Avesh Khan":          {"batting_avg":6.00, "strike_rate":70.00, "economy":9.30,"wickets_per_match":1.1,"role":"Bowler",             "team":"LSG","data_source":"real_ipl"},
+    "Mohsin Khan":         {"batting_avg":5.00, "strike_rate":65.00, "economy":8.70,"wickets_per_match":1.1,"role":"Bowler",             "team":"LSG","data_source":"real_ipl"},
+    "Abdul Samad":         {"batting_avg":24.00,"strike_rate":170.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"LSG","data_source":"real_ipl"},
+    "Ayush Badoni":        {"batting_avg":26.00,"strike_rate":155.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"LSG","data_source":"real_ipl"},
+    "Matthew Breetzke":    {"batting_avg":28.00,"strike_rate":150.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"LSG","data_source":"estimated_domestic"},
+    "Himmat Singh":        {"batting_avg":20.00,"strike_rate":148.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"LSG","data_source":"estimated_domestic"},
+    "Josh Inglis":         {"batting_avg":30.00,"strike_rate":162.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"LSG","data_source":"real_ipl"},
+    "Anrich Nortje":       {"batting_avg":6.00, "strike_rate":68.00, "economy":8.60,"wickets_per_match":1.3,"role":"Bowler",             "team":"LSG","data_source":"real_ipl"},
+    "Wanindu Hasaranga":   {"batting_avg":18.00,"strike_rate":148.00,"economy":8.10,"wickets_per_match":1.2,"role":"All-Rounder",        "team":"LSG","data_source":"real_ipl"},
+    "Arshin Kulkarni":     {"batting_avg":16.00,"strike_rate":145.00,"economy":8.70,"wickets_per_match":0.7,"role":"All-Rounder",        "team":"LSG","data_source":"estimated_domestic"},
+    "Digvesh Rathi":       {"batting_avg":6.00, "strike_rate":68.00, "economy":8.50,"wickets_per_match":1.0,"role":"Bowler",             "team":"LSG","data_source":"estimated_domestic"},
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # DELHI CAPITALS (DC)
-    # ══════════════════════════════════════════════════════════════════════════
-    "Axar Patel":         {"batting_avg":24.00,"strike_rate":153.00,"economy":8.10,"wickets_per_match":1.1,"role":"All-Rounder",        "team":"DC","data_source":"real_ipl"},
-    "KL Rahul":           {"batting_avg":45.62,"strike_rate":174.41,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"DC","data_source":"real_ipl"},
-    "Kuldeep Yadav":      {"batting_avg":6.00, "strike_rate":80.00, "economy":8.10,"wickets_per_match":1.3,"role":"Bowler",             "team":"DC","data_source":"real_ipl"},
-    "Mitchell Starc":     {"batting_avg":8.00, "strike_rate":88.00, "economy":8.50,"wickets_per_match":1.2,"role":"Bowler",             "team":"DC","data_source":"real_ipl"},
-    "T Natarajan":        {"batting_avg":5.00, "strike_rate":65.00, "economy":8.80,"wickets_per_match":1.1,"role":"Bowler",             "team":"DC","data_source":"real_ipl"},
-    "Tristan Stubbs":     {"batting_avg":26.00,"strike_rate":172.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"real_ipl"},
-    "Karun Nair":         {"batting_avg":22.00,"strike_rate":145.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"real_ipl"},
-    "Ashutosh Sharma":    {"batting_avg":24.43,"strike_rate":181.91,"economy":9.20,"wickets_per_match":0.3,"role":"All-Rounder",        "team":"DC","data_source":"real_ipl"},
-    "Vipraj Nigam":       {"batting_avg":20.29,"strike_rate":179.74,"economy":8.40,"wickets_per_match":0.8,"role":"All-Rounder",        "team":"DC","data_source":"real_ipl"},
-    "Sameer Rizvi":       {"batting_avg":22.00,"strike_rate":165.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"real_ipl"},
-    "Abishek Porel":      {"batting_avg":20.00,"strike_rate":152.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"DC","data_source":"estimated_domestic"},
-    "Nitish Rana":        {"batting_avg":24.00,"strike_rate":145.00,"economy":8.50,"wickets_per_match":0.3,"role":"All-Rounder",        "team":"DC","data_source":"real_ipl"},
-    "Mukesh Kumar":       {"batting_avg":5.00, "strike_rate":65.00, "economy":9.10,"wickets_per_match":1.1,"role":"Bowler",             "team":"DC","data_source":"real_ipl"},
-    "Dushmantha Chameera":{"batting_avg":6.00, "strike_rate":68.00, "economy":9.20,"wickets_per_match":1.1,"role":"Bowler",             "team":"DC","data_source":"estimated_domestic"},
-    "Ben Duckett":        {"batting_avg":30.00,"strike_rate":162.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"real_ipl"},
-    "David Miller":       {"batting_avg":34.00,"strike_rate":180.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"real_ipl"},
-    "Pathum Nissanka":    {"batting_avg":28.00,"strike_rate":148.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"estimated_domestic"},
-    "Kyle Jamieson":      {"batting_avg":16.00,"strike_rate":138.00,"economy":8.90,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"DC","data_source":"real_ipl"},
-    "Auqib Nabi Dar":     {"batting_avg":8.00, "strike_rate":78.00, "economy":8.70,"wickets_per_match":1.1,"role":"Bowler",             "team":"DC","data_source":"estimated_domestic"},
-    "Prithvi Shaw":       {"batting_avg":26.00,"strike_rate":160.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"real_ipl"},
+    # ══ DELHI CAPITALS (DC) ══════════════════════════════════════════════════
+    "Axar Patel":          {"batting_avg":24.00,"strike_rate":153.00,"economy":8.10,"wickets_per_match":1.1,"role":"All-Rounder",        "team":"DC","data_source":"real_ipl"},
+    "KL Rahul":            {"batting_avg":45.62,"strike_rate":174.41,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"DC","data_source":"real_ipl"},
+    "Kuldeep Yadav":       {"batting_avg":6.00, "strike_rate":80.00, "economy":8.10,"wickets_per_match":1.3,"role":"Bowler",             "team":"DC","data_source":"real_ipl"},
+    "Mitchell Starc":      {"batting_avg":8.00, "strike_rate":88.00, "economy":8.50,"wickets_per_match":1.2,"role":"Bowler",             "team":"DC","data_source":"real_ipl"},
+    "T Natarajan":         {"batting_avg":5.00, "strike_rate":65.00, "economy":8.80,"wickets_per_match":1.1,"role":"Bowler",             "team":"DC","data_source":"real_ipl"},
+    "Tristan Stubbs":      {"batting_avg":26.00,"strike_rate":172.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"real_ipl"},
+    "Karun Nair":          {"batting_avg":22.00,"strike_rate":145.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"real_ipl"},
+    "Ashutosh Sharma":     {"batting_avg":24.43,"strike_rate":181.91,"economy":9.20,"wickets_per_match":0.3,"role":"All-Rounder",        "team":"DC","data_source":"real_ipl"},
+    "Vipraj Nigam":        {"batting_avg":20.29,"strike_rate":179.74,"economy":8.40,"wickets_per_match":0.8,"role":"All-Rounder",        "team":"DC","data_source":"real_ipl"},
+    "Sameer Rizvi":        {"batting_avg":22.00,"strike_rate":165.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"real_ipl"},
+    "Abishek Porel":       {"batting_avg":20.00,"strike_rate":152.00,"economy":9.50,"wickets_per_match":0.0,"role":"Wicketkeeper-Batter","team":"DC","data_source":"estimated_domestic"},
+    "Nitish Rana":         {"batting_avg":24.00,"strike_rate":145.00,"economy":8.50,"wickets_per_match":0.3,"role":"All-Rounder",        "team":"DC","data_source":"real_ipl"},
+    "Mukesh Kumar":        {"batting_avg":5.00, "strike_rate":65.00, "economy":9.10,"wickets_per_match":1.1,"role":"Bowler",             "team":"DC","data_source":"real_ipl"},
+    "Dushmantha Chameera": {"batting_avg":6.00, "strike_rate":68.00, "economy":9.20,"wickets_per_match":1.1,"role":"Bowler",             "team":"DC","data_source":"estimated_domestic"},
+    "Ben Duckett":         {"batting_avg":30.00,"strike_rate":162.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"real_ipl"},
+    "David Miller":        {"batting_avg":34.00,"strike_rate":180.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"real_ipl"},
+    "Pathum Nissanka":     {"batting_avg":28.00,"strike_rate":148.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"estimated_domestic"},
+    "Kyle Jamieson":       {"batting_avg":16.00,"strike_rate":138.00,"economy":8.90,"wickets_per_match":1.0,"role":"All-Rounder",        "team":"DC","data_source":"real_ipl"},
+    "Prithvi Shaw":        {"batting_avg":26.00,"strike_rate":160.00,"economy":9.50,"wickets_per_match":0.0,"role":"Batsman",            "team":"DC","data_source":"real_ipl"},
 }
 
 PLAYERS = [(name, stats["role"], stats["team"]) for name, stats in REAL_PLAYER_STATS.items()]
@@ -267,7 +239,6 @@ PITCH_ROLE_WEIGHTS = {
 }
 
 PLAYER_MODIFIERS = {
-    # Batsmen / WK-Batters
     "Vaibhav Sooryavanshi": {"Flat/Batting": 0.20, "Hard/True Bounce": 0.18},
     "Virat Kohli":          {"Flat/Batting": 0.15, "Slow/Dry Spin": 0.12},
     "Suryakumar Yadav":     {"Flat/Batting": 0.18, "Hard/True Bounce": 0.15},
@@ -292,7 +263,7 @@ PLAYER_MODIFIERS = {
     "Shimron Hetmyer":      {"Flat/Batting": 0.16, "Wet/Dew Heavy": 0.13},
     "Rovman Powell":        {"Flat/Batting": 0.15, "Hard/True Bounce": 0.12},
     "Rajat Patidar":        {"Flat/Batting": 0.14, "Hard/True Bounce": 0.10},
-    # Bowlers
+    "MS Dhoni":             {"Wet/Dew Heavy": 0.16, "Flat/Batting": 0.08},
     "Jasprit Bumrah":       {"Green/Grassy": 0.22, "Hard/True Bounce": 0.20, "Wet/Dew Heavy": 0.18},
     "Arshdeep Singh":       {"Green/Grassy": 0.14, "Wet/Dew Heavy": 0.18},
     "Yuzvendra Chahal":     {"Slow/Dry Spin": 0.22, "Flat/Batting": 0.06},
@@ -316,7 +287,6 @@ PLAYER_MODIFIERS = {
     "Matheesha Pathirana":  {"Wet/Dew Heavy": 0.16, "Green/Grassy": 0.12},
     "Harshal Patel":        {"Wet/Dew Heavy": 0.14, "Slow/Dry Spin": 0.08},
     "Mohammed Siraj":       {"Green/Grassy": 0.14, "Hard/True Bounce": 0.12},
-    # All-Rounders
     "Ravindra Jadeja":      {"Slow/Dry Spin": 0.20, "Flat/Batting": 0.10},
     "Hardik Pandya":        {"Flat/Batting": 0.10, "Green/Grassy": 0.12},
     "Axar Patel":           {"Slow/Dry Spin": 0.18, "Flat/Batting": 0.08},
@@ -356,15 +326,15 @@ def _compute_suitability(player_name, role, pitch_type, batting_avg, strike_rate
     player_mod  = PLAYER_MODIFIERS.get(player_name, {}).get(pitch_type, 0.0)
     norm_avg  = min(batting_avg  / 70,  1.0)
     norm_sr   = min(strike_rate  / 220, 1.0)
-    norm_econ = max(0, 1 - (economy - 5) / 7)
-    norm_wpm  = min(wickets_per_match / 3, 1.0)
+    norm_econ = max(0.0, 1.0 - (economy - 5.0) / 7.0)
+    norm_wpm  = min(wickets_per_match / 3.0, 1.0)
     if role == "Batsman":
         raw = 0.45 * norm_avg + 0.45 * norm_sr + 0.10 * norm_econ
     elif role == "Bowler":
         raw = 0.20 * norm_avg + 0.10 * norm_sr + 0.45 * norm_econ + 0.25 * norm_wpm
     elif role == "All-Rounder":
         raw = 0.30 * norm_avg + 0.25 * norm_sr + 0.25 * norm_econ + 0.20 * norm_wpm
-    else:
+    else:  # Wicketkeeper-Batter
         raw = 0.40 * norm_avg + 0.45 * norm_sr + 0.10 * norm_econ + 0.05 * norm_wpm
     score = (raw * base_weight + player_mod) * 100
     score += rng.normal(0, 2)
@@ -372,41 +342,43 @@ def _compute_suitability(player_name, role, pitch_type, batting_avg, strike_rate
 
 
 def _reason(player_name, role, pitch_type, suitability_score, batting_avg, strike_rate, economy):
-    ds = REAL_PLAYER_STATS[player_name]["data_source"]
+    ds  = REAL_PLAYER_STATS.get(player_name, {}).get("data_source", "real_ipl")
     tag = "" if ds == "real_ipl" else " (est.)"
     reasons = {
         "Flat/Batting": {
-            "Batsman":             f"Flat track rewards timing — IPL avg {batting_avg:.0f}{tag} & SR {strike_rate:.0f} are outstanding here.",
+            "Batsman":             f"Flat track rewards timing — IPL avg {batting_avg:.0f}{tag} & SR {strike_rate:.0f}.",
             "Bowler":              f"Economy {economy:.2f}{tag} helps contain runs on a flat surface.",
-            "All-Rounder":         f"Bat-first pitch unlocks both contributions; avg {batting_avg:.0f}{tag}, SR {strike_rate:.0f}.",
+            "All-Rounder":         f"Bat-first pitch unlocks both skills; avg {batting_avg:.0f}{tag}, SR {strike_rate:.0f}.",
             "Wicketkeeper-Batter": f"WK-batter with SR {strike_rate:.0f}{tag} excels on flat batting tracks.",
         },
         "Hard/True Bounce": {
             "Batsman":             f"True bounce suits front-foot batters — SR {strike_rate:.0f}{tag}, avg {batting_avg:.0f}.",
-            "Bowler":              f"Hit-the-deck bowler extracts carry; economy {economy:.2f}{tag} on hard surfaces.",
-            "All-Rounder":         f"Extra pace aids bowling; batting avg {batting_avg:.0f}{tag} still competitive.",
-            "Wicketkeeper-Batter": f"Hard-pitch punchy footwork — avg {batting_avg:.0f}{tag} suits this format.",
+            "Bowler":              f"Hit-the-deck pace bowler; economy {economy:.2f}{tag} on hard surfaces.",
+            "All-Rounder":         f"Extra bounce aids bowling; batting avg {batting_avg:.0f}{tag} still competitive.",
+            "Wicketkeeper-Batter": f"Hard-pitch punchy batter — avg {batting_avg:.0f}{tag} suits this format.",
         },
         "Green/Grassy": {
             "Batsman":             f"Solid technique holds up — avg {batting_avg:.0f}{tag} on a seaming surface.",
-            "Bowler":              f"Seam & swing support; economy {economy:.2f}{tag} with wickets per match impressive.",
+            "Bowler":              f"Seam & swing support; economy {economy:.2f}{tag} + wickets per match impressive.",
             "All-Rounder":         f"Seam bowling + batting avg {batting_avg:.0f}{tag} = dual impact on green top.",
-            "Wicketkeeper-Batter": f"Patient WK-batter exploits loose balls after top-order falls.",
+            "Wicketkeeper-Batter": f"Patient batter exploits loose deliveries after top-order falls.",
         },
         "Slow/Dry Spin": {
             "Batsman":             f"Reads spin well — avg {batting_avg:.0f}{tag} on turning tracks.",
             "Bowler":              f"Spin surface; economy {economy:.2f}{tag} + high wicket yield on dry pitches.",
-            "All-Rounder":         f"Spinning all-rounder: avg {batting_avg:.0f}{tag} + turns the ball both ways.",
+            "All-Rounder":         f"Spinning all-rounder: avg {batting_avg:.0f}{tag} + turns the ball.",
             "Wicketkeeper-Batter": f"Steady on sticky tracks — SR {strike_rate:.0f}{tag} still effective.",
         },
         "Wet/Dew Heavy": {
             "Batsman":             f"Dew aids chasing — SR {strike_rate:.0f}{tag} maximised when ball skids on.",
             "Bowler":              f"Yorker specialist; economy {economy:.2f}{tag} crucial as dew limits spin.",
-            "All-Rounder":         f"Death-over impact; batting avg {batting_avg:.0f}{tag} compensates when bowling is harder.",
-            "Wicketkeeper-Batter": f"Dew helps timing — WK-batter SR {strike_rate:.0f}{tag} thrives chasing.",
+            "All-Rounder":         f"Death-over impact; avg {batting_avg:.0f}{tag} compensates when bowling is harder.",
+            "Wicketkeeper-Batter": f"Dew helps timing — SR {strike_rate:.0f}{tag} thrives when chasing.",
         },
     }
-    return reasons.get(pitch_type, {}).get(role, f"IPL suitability score {suitability_score:.1f}/100{tag}.")
+    return reasons.get(pitch_type, {}).get(
+        role, f"Consistent IPL performer — suitability score {suitability_score:.1f}/100{tag}."
+    )
 
 
 def generate_ipl_dataset(n_records_per_combo: int = 4, seed: int = 42):

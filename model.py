@@ -5,11 +5,11 @@ from sklearn.preprocessing import LabelEncoder
 
 
 def train_model(df: pd.DataFrame):
-    """Train RandomForest on suitability_score."""
-    le_pitch  = LabelEncoder()
-    le_venue  = LabelEncoder()
-    le_toss   = LabelEncoder()
-    le_role   = LabelEncoder()
+    """Train RandomForest regressor on suitability_score."""
+    le_pitch = LabelEncoder()
+    le_venue = LabelEncoder()
+    le_toss  = LabelEncoder()
+    le_role  = LabelEncoder()
 
     df = df.copy()
     df['pitch_encoded'] = le_pitch.fit_transform(df['pitch_type'])
@@ -17,20 +17,24 @@ def train_model(df: pd.DataFrame):
     df['toss_encoded']  = le_toss.fit_transform(df['toss'])
     df['role_encoded']  = le_role.fit_transform(df['role'])
 
-    feature_cols = ['batting_avg', 'strike_rate', 'economy', 'wickets_per_match',
-                    'pitch_encoded', 'venue_encoded', 'toss_encoded', 'role_encoded']
+    feature_cols = [
+        'batting_avg', 'strike_rate', 'economy', 'wickets_per_match',
+        'pitch_encoded', 'venue_encoded', 'toss_encoded', 'role_encoded'
+    ]
 
     X = df[feature_cols]
     y = df['suitability_score']
 
-    model = RandomForestRegressor(n_estimators=200, max_depth=12, random_state=42, n_jobs=-1)
+    model = RandomForestRegressor(
+        n_estimators=200, max_depth=12, random_state=42, n_jobs=-1
+    )
     model.fit(X, y)
 
     label_encoders = {
-        'pitch':  le_pitch,
-        'venue':  le_venue,
-        'toss':   le_toss,
-        'role':   le_role,
+        'pitch': le_pitch,
+        'venue': le_venue,
+        'toss':  le_toss,
+        'role':  le_role,
     }
     return model, label_encoders, feature_cols
 
@@ -46,16 +50,24 @@ def predict_best_players(
     top_n: int = 10,
     role_filter: list = None,
 ):
-    """Predict suitability for all players given the conditions."""
-    from data_generator import PLAYERS, PITCH_ROLE_WEIGHTS, PLAYER_MODIFIERS, _reason
+    """Predict suitability score for every player under the given conditions."""
+    from data_generator import PLAYER_MODIFIERS, _reason, REAL_PLAYER_STATS
 
-    # Aggregate player-level stats from historical data
-    agg = df.groupby(['player_name', 'role', 'team']).agg(
-        batting_avg=('batting_avg', 'mean'),
-        strike_rate=('strike_rate', 'mean'),
-        economy=('economy', 'mean'),
-        wickets_per_match=('wickets_per_match', 'mean'),
-    ).reset_index()
+    # Aggregate per player (mean stats across all records)
+    agg_dict = {
+        'batting_avg':       ('batting_avg',       'mean'),
+        'strike_rate':       ('strike_rate',        'mean'),
+        'economy':           ('economy',            'mean'),
+        'wickets_per_match': ('wickets_per_match',  'mean'),
+    }
+    # Include data_source if present
+    group_cols = ['player_name', 'role', 'team']
+    agg = df.groupby(group_cols).agg(**agg_dict).reset_index()
+
+    # Attach data_source from master dict (safe fallback to 'real_ipl')
+    agg['data_source'] = agg['player_name'].apply(
+        lambda n: REAL_PLAYER_STATS.get(n, {}).get('data_source', 'real_ipl')
+    )
 
     # Apply role filter
     if role_filter:
@@ -64,7 +76,6 @@ def predict_best_players(
     if agg.empty:
         return agg
 
-    # Encode input conditions
     le_p = label_encoders['pitch']
     le_v = label_encoders['venue']
     le_t = label_encoders['toss']
@@ -72,10 +83,16 @@ def predict_best_players(
 
     try:
         p_enc = le_p.transform([pitch_type])[0]
+    except ValueError:
+        p_enc = 0
+    try:
         v_enc = le_v.transform([venue])[0]
+    except ValueError:
+        v_enc = 0
+    try:
         t_enc = le_t.transform([toss])[0]
     except ValueError:
-        p_enc, v_enc, t_enc = 0, 0, 0
+        t_enc = 0
 
     rows = []
     for _, row in agg.iterrows():
@@ -89,11 +106,10 @@ def predict_best_players(
             row['wickets_per_match'], p_enc, v_enc, t_enc, r_enc
         ]], columns=feature_cols)
 
-        pred_score = model.predict(features)[0]
+        pred_score = float(model.predict(features)[0])
 
-        # Add player-specific modifier
         player_mod = PLAYER_MODIFIERS.get(row['player_name'], {}).get(pitch_type, 0.0)
-        final_score = round(np.clip(pred_score + player_mod * 100, 0, 100), 2)
+        final_score = round(float(np.clip(pred_score + player_mod * 100, 0, 100)), 2)
 
         reason = _reason(
             row['player_name'], row['role'], pitch_type,
@@ -101,10 +117,22 @@ def predict_best_players(
         )
 
         rows.append({
-            **row.to_dict(),
+            'player_name':       row['player_name'],
+            'role':              row['role'],
+            'team':              row['team'],
+            'data_source':       row['data_source'],
+            'batting_avg':       round(row['batting_avg'], 2),
+            'strike_rate':       round(row['strike_rate'], 2),
+            'economy':           round(row['economy'], 2),
+            'wickets_per_match': round(row['wickets_per_match'], 2),
             'suitability_score': final_score,
-            'reason': reason,
+            'reason':            reason,
         })
 
-    result = pd.DataFrame(rows).sort_values('suitability_score', ascending=False).head(top_n).reset_index(drop=True)
+    result = (
+        pd.DataFrame(rows)
+        .sort_values('suitability_score', ascending=False)
+        .head(top_n)
+        .reset_index(drop=True)
+    )
     return result
