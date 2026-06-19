@@ -1,7 +1,7 @@
 # 🏏 IPL Pitch Predictor — ML Player Recommendation System
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
-![Streamlit](https://img.shields.io/badge/Streamlit-Live_App-FF4B4B?logo=streamlit)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ipl-pitch-predictor.streamlit.app)
 ![scikit-learn](https://img.shields.io/badge/ML-RandomForest-orange?logo=scikit-learn)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -10,6 +10,9 @@
 ---
 
 ## 🚀 Live Demo
+
+### 👉 [https://ipl-pitch-predictor.streamlit.app](https://ipl-pitch-predictor.streamlit.app)
+
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ipl-pitch-predictor.streamlit.app)
 
 ---
@@ -54,7 +57,7 @@ Features → RandomForestRegressor → Suitability Score (0–100)
 
 ---
 
-## 🛠️ Installation
+## 🛠️ Run Locally
 
 ```bash
 git clone https://github.com/jyotheeswar012-max/ipl-pitch-predictor
@@ -65,14 +68,14 @@ streamlit run app.py
 
 ---
 
-## 🌐 Deploy to Streamlit Cloud
+## 🌐 Deploy to Streamlit Cloud (Steps)
 
 1. Go to [share.streamlit.io](https://share.streamlit.io)
 2. Sign in with GitHub (`jyotheeswar012-max`)
-3. New App → Repo: `ipl-pitch-predictor` → Branch: `main` → File: `app.py`
+3. **New App** → Repo: `ipl-pitch-predictor` → Branch: `main` → File: `app.py`
 4. Click **Deploy** 🚀
 
-Live URL will be:
+✅ Live URL:
 ```
 https://ipl-pitch-predictor.streamlit.app
 ```
